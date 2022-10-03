@@ -1,7 +1,7 @@
 {
   "SaveName": "Bako - Dig and Write",
-  "EpochTime": 1664723220,
-  "Date": "10/2/2022 12:07:00 PM",
+  "EpochTime": 1664840452,
+  "Date": "10/3/2022 8:40:52 PM",
   "VersionNumber": "v13.2.2",
   "GameMode": "Bako - Dig and Write",
   "GameType": "",
@@ -9,7 +9,7 @@
   "Tags": [],
   "Gravity": 0.5,
   "PlayArea": 0.5,
-  "Table": "Table_RPG",
+  "Table": "Table_None",
   "Sky": "Sky_Sunset",
   "Note": "",
   "TabStates": {
@@ -214,396 +214,20 @@
     "TurnColor": ""
   },
   "DecalPallet": [],
-  "LuaScript": "--[[ Lua code. See documentation: https://api.tabletopsimulator.com/ --]]\n\n--[[ The onLoad event is called after the game save finishes loading. --]]\nfunction onLoad()\n    --[[ print('onLoad!') --]]\n    buttonContainer = getObjectFromGUID('0f1ba4')\n    buttonContainer.createButton(\n        {\n            click_function = 'setup',\n            function_owner = Global,\n            label          = 'Setup',\n            position       = {\n                0, 0.01, 1.5\n    --             -- 0, 0, 0\n                -- gameSheetsBag.getPosition().x,\n                -- gameSheetsBag.getPosition().y,\n                -- gameSheetsBag.getPosition().z\n            },\n            scale = {\n                2,\n                2,\n                2\n            },\n            width          = 400,\n            height         = 120\n        }\n    )\nend\n\n--[[ The onUpdate event is called once per frame. --]]\nfunction onUpdate()\n    --[[ print('onUpdate loop!') --]]\nend\n\nfunction setup()\n    -- Place Discovery cards\n    buttonContainer.removeButton(#buttonContainer.getButtons() - 3)\n    for _, obj in pairs(getObjects()) do\n        if obj.type == 'Deck' then\n            obj.shuffle()\n            Wait.time(\n                function()\n                    obj.takeObject(\n                        {\n                            position = {\n                                obj.getPosition().x,\n                                obj.getPosition().y + 3,\n                                obj.getPosition().z\n                            },\n                            smooth = true,\n                            callback_function = function(takenObject)\n                                if takenObject.type == 'Card' and takenObject.is_face_down then\n                                    Wait.time(\n                                        function()\n                                            takenObject.flip()\n                                        end,\n                                        0.8\n                                    )\n                                end\n                                obj.destruct()\n                            end\n                        }\n                    )\n                end,\n                0.6\n            )\n            -- obj.destruct()\n        end\n    end\n\n    -- Deal Game sheets\n    local gameSheetsBag = getObjectFromGUID('ff8268')\n    -- local gameSheetsBag = nil\n    -- for _, obj in pairs(getObjects()) do\n    --     -- log(obj.name)\n    --     -- log(obj.type)\n    --     if obj.type == 'Infinite_Bag' then -- and obj.getName() == 'Game Sheets' then\n    --         gameSheetsBag = obj\n    --         log(\"found bag\")\n    --         log(gameSheetsBag.getGUID())\n    --         break\n    --     end\n    -- end\n    for _, playerColorName in pairs(getSeatedPlayers()) do\n        for _, hand in ipairs(Hands.getHands()) do\n            local data = hand.getData()\n            for k, v in pairs(data) do\n                if k == \"ColorDiffuse\" then\n                    local handZoneColor = cloneWithAlpha1(v)\n                    local playerColor = Color.fromString(playerColorName)\n                    if handZoneColor == playerColor then\n                        local newPosition = nil\n                        if hand.getRotation().y == 0 then\n                            newPosition = {\n                                hand.getPosition().x,\n                                hand.getPosition().y,\n                                hand.getPosition().z + 8.36\n                            }\n                        end\n                        if hand.getRotation().y == 90 then\n                            newPosition = {\n                                hand.getPosition().x + 8.36,\n                                hand.getPosition().y,\n                                hand.getPosition().z\n                            }\n                        end\n                        if hand.getRotation().y == 180 then\n                            newPosition = {\n                                hand.getPosition().x,\n                                hand.getPosition().y,\n                                hand.getPosition().z - 8.36\n                            }\n                        end\n                        if hand.getRotation().y == 270 then\n                            newPosition = {\n                                hand.getPosition().x - 8.36,\n                                hand.getPosition().y,\n                                hand.getPosition().z\n                            }\n                        end\n                        gameSheetsBag.takeObject(\n                            {\n                                position = newPosition,\n                                rotation = {\n                                    0, 180, 0\n                                },\n                                smooth = true,\n                                callback_function = function(takenObject)\n                                    Wait.time(\n                                        function()\n                                            takenObject.setLock(true)\n                                        end,\n                                        3\n                                    )\n                                end\n                            }\n                        )\n                        break\n                    end\n                end\n            end\n        end\n    end\nend\n\n -- alpha 1 is needed since equals() contemplated it\n function cloneWithAlpha1(color)\n    local copy = color:copy()\n    copy:set(copy.r, copy.g, copy.b, 1)\n    return copy\nend",
+  "LuaScript": "function onLoad()\n    buttonContainer = getObjectFromGUID('0f1ba4')\n    buttonContainer.createButton(\n        {\n            click_function = 'setup',\n            function_owner = Global,\n            label          = 'Setup',\n            position       = {\n                0, 0.01, 1.5\n            },\n            scale = {\n                2,\n                2,\n                2\n            },\n            width          = 400,\n            height         = 120\n        }\n    )\nend\n\nfunction setup()\n    -- Place Discovery cards\n    buttonContainer.removeButton(#buttonContainer.getButtons() - 3)\n    for _, obj in pairs(getObjects()) do\n        if obj.type == 'Deck' then\n            obj.shuffle()\n            Wait.time(\n                function()\n                    obj.takeObject(\n                        {\n                            position = {\n                                obj.getPosition().x,\n                                obj.getPosition().y + 3,\n                                obj.getPosition().z\n                            },\n                            smooth = true,\n                            callback_function = function(takenObject)\n                                if takenObject.type == 'Card' and takenObject.is_face_down then\n                                    Wait.time(\n                                        function()\n                                            takenObject.flip()\n                                        end,\n                                        0.8\n                                    )\n                                end\n                                obj.destruct()\n                            end\n                        }\n                    )\n                end,\n                0.6\n            )\n            -- obj.destruct()\n        end\n    end\n\n    -- Deal Game sheets\n    local drawer = getObjectFromGUID('3dcbdd')\n    drawer.call('onButtonClick')\n    Wait.time(\n        function()\n            local gameSheetsBag = getObjectFromGUID('ff8268')\n            for _, playerColorName in pairs(getSeatedPlayers()) do\n                for _, hand in ipairs(Hands.getHands()) do\n                    local data = hand.getData()\n                    for k, v in pairs(data) do\n                        if k == \"ColorDiffuse\" then\n                            local handZoneColor = cloneWithAlpha1(v)\n                            local playerColor = Color.fromString(playerColorName)\n                            if handZoneColor == playerColor then\n                                local newPosition = nil\n                                local newRotation = nil\n                                if hand.getRotation().y == 0 then\n                                    newPosition = {\n                                        hand.getPosition().x,\n                                        hand.getPosition().y,\n                                        hand.getPosition().z + 18\n                                    }\n                                end\n                                if hand.getRotation().y == 90 then\n                                    newPosition = {\n                                        hand.getPosition().x + 11,\n                                        hand.getPosition().y,\n                                        hand.getPosition().z\n                                    }\n                                end\n                                if hand.getRotation().y == 180 then\n                                    newPosition = {\n                                        hand.getPosition().x,\n                                        hand.getPosition().y,\n                                        hand.getPosition().z - 18\n                                    }\n                                end\n                                if hand.getRotation().y == 270 then\n                                    newPosition = {\n                                        hand.getPosition().x - 11,\n                                        hand.getPosition().y,\n                                        hand.getPosition().z\n                                    }\n                                end\n                                local newRotation = {hand.getRotation().x, hand.getRotation().y - 180, hand.getRotation().z}\n                                gameSheetsBag.takeObject(\n                                    {\n                                        position = newPosition,\n                                        rotation = newRotation,\n                                        smooth = true,\n                                        callback_function = function(takenObject)\n                                            Wait.time(\n                                                function()\n                                                    takenObject.setLock(true)\n                                                end,\n                                                3\n                                            )\n                                        end\n                                    }\n                                )\n                                break\n                            end\n                        end\n                    end\n                end\n                Wait.time(\n                    function()\n                        drawer = getObjectFromGUID('661907')\n                        drawer.call('onButtonClick')\n                    end,\n                    1\n                )\n            end\n        end,\n        2\n    )\nend\n\n -- alpha 1 is needed since equals() contemplated it\n function cloneWithAlpha1(color)\n    local copy = color:copy()\n    copy:set(copy.r, copy.g, copy.b, 1)\n    return copy\nend",
   "LuaScriptState": "",
   "XmlUI": "<!-- Xml UI. See documentation: https://api.tabletopsimulator.com/ui/introUI/ -->",
   "ObjectStates": [
     {
-      "GUID": "d7b66f",
-      "Name": "HandTrigger",
-      "Transform": {
-        "posX": -7.82,
-        "posY": 4.81034231,
-        "posZ": -20.1076221,
-        "rotX": 0.0,
-        "rotY": 0.0,
-        "rotZ": 0.0,
-        "scaleX": 11.7719851,
-        "scaleY": 9.174497,
-        "scaleZ": 4.871238
-      },
-      "Nickname": "",
-      "Description": "",
-      "GMNotes": "",
-      "AltLookAngle": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "ColorDiffuse": {
-        "r": 0.856,
-        "g": 0.09999997,
-        "b": 0.09399996,
-        "a": 0.0
-      },
-      "LayoutGroupSortIndex": 0,
-      "Value": 0,
-      "Locked": true,
-      "Grid": false,
-      "Snap": true,
-      "IgnoreFoW": false,
-      "MeasureMovement": false,
-      "DragSelectable": true,
-      "Autoraise": true,
-      "Sticky": true,
-      "Tooltip": true,
-      "GridProjection": false,
-      "HideWhenFaceDown": false,
-      "Hands": false,
-      "FogColor": "Red",
-      "LuaScript": "",
-      "LuaScriptState": "",
-      "XmlUI": ""
-    },
-    {
-      "GUID": "4285e9",
-      "Name": "HandTrigger",
-      "Transform": {
-        "posX": -30.2150211,
-        "posY": 4.81034231,
-        "posZ": 10.17524,
-        "rotX": 0.0,
-        "rotY": 90.0,
-        "rotZ": 0.0,
-        "scaleX": 11.6554289,
-        "scaleY": 9.174497,
-        "scaleZ": 4.91995144
-      },
-      "Nickname": "",
-      "Description": "",
-      "GMNotes": "",
-      "AltLookAngle": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "ColorDiffuse": {
-        "r": 0.905,
-        "g": 0.898,
-        "b": 0.171999961,
-        "a": 0.0
-      },
-      "LayoutGroupSortIndex": 0,
-      "Value": 0,
-      "Locked": true,
-      "Grid": false,
-      "Snap": true,
-      "IgnoreFoW": false,
-      "MeasureMovement": false,
-      "DragSelectable": true,
-      "Autoraise": true,
-      "Sticky": true,
-      "Tooltip": true,
-      "GridProjection": false,
-      "HideWhenFaceDown": false,
-      "Hands": false,
-      "FogColor": "Yellow",
-      "LuaScript": "",
-      "LuaScriptState": "",
-      "XmlUI": ""
-    },
-    {
-      "GUID": "fe7058",
-      "Name": "HandTrigger",
-      "Transform": {
-        "posX": 30.2511711,
-        "posY": 4.81034231,
-        "posZ": 9.59069252,
-        "rotX": 0.0,
-        "rotY": 270.0,
-        "rotZ": 0.0,
-        "scaleX": 11.6554213,
-        "scaleY": 9.174497,
-        "scaleZ": 4.91995144
-      },
-      "Nickname": "",
-      "Description": "",
-      "GMNotes": "",
-      "AltLookAngle": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "ColorDiffuse": {
-        "r": 0.627,
-        "g": 0.124999978,
-        "b": 0.941,
-        "a": 0.0
-      },
-      "LayoutGroupSortIndex": 0,
-      "Value": 0,
-      "Locked": true,
-      "Grid": false,
-      "Snap": true,
-      "IgnoreFoW": false,
-      "MeasureMovement": false,
-      "DragSelectable": true,
-      "Autoraise": true,
-      "Sticky": true,
-      "Tooltip": true,
-      "GridProjection": false,
-      "HideWhenFaceDown": false,
-      "Hands": false,
-      "FogColor": "Purple",
-      "LuaScript": "",
-      "LuaScriptState": "",
-      "XmlUI": ""
-    },
-    {
-      "GUID": "9a84a0",
-      "Name": "HandTrigger",
-      "Transform": {
-        "posX": 8.07,
-        "posY": 4.81,
-        "posZ": 19.8365288,
-        "rotX": 0.0,
-        "rotY": 179.8,
-        "rotZ": 0.0,
-        "scaleX": 11.7719746,
-        "scaleY": 9.174497,
-        "scaleZ": 4.87124
-      },
-      "Nickname": "",
-      "Description": "",
-      "GMNotes": "",
-      "AltLookAngle": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "ColorDiffuse": {
-        "r": 0.117999978,
-        "g": 0.53,
-        "b": 1.0,
-        "a": 0.0
-      },
-      "LayoutGroupSortIndex": 0,
-      "Value": 0,
-      "Locked": true,
-      "Grid": false,
-      "Snap": true,
-      "IgnoreFoW": false,
-      "MeasureMovement": false,
-      "DragSelectable": true,
-      "Autoraise": true,
-      "Sticky": true,
-      "Tooltip": true,
-      "GridProjection": false,
-      "HideWhenFaceDown": false,
-      "Hands": false,
-      "FogColor": "Blue",
-      "LuaScript": "",
-      "LuaScriptState": "",
-      "XmlUI": ""
-    },
-    {
-      "GUID": "8f9ce4",
-      "Name": "HandTrigger",
-      "Transform": {
-        "posX": 8.068087,
-        "posY": 4.81034231,
-        "posZ": -20.1400986,
-        "rotX": 0.0,
-        "rotY": 0.0,
-        "rotZ": 0.0,
-        "scaleX": 11.7719707,
-        "scaleY": 9.174499,
-        "scaleZ": 4.871238
-      },
-      "Nickname": "",
-      "Description": "",
-      "GMNotes": "",
-      "AltLookAngle": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "ColorDiffuse": {
-        "r": 1.0,
-        "g": 1.0,
-        "b": 1.0,
-        "a": 0.0
-      },
-      "LayoutGroupSortIndex": 0,
-      "Value": 0,
-      "Locked": true,
-      "Grid": false,
-      "Snap": true,
-      "IgnoreFoW": false,
-      "MeasureMovement": false,
-      "DragSelectable": true,
-      "Autoraise": true,
-      "Sticky": true,
-      "Tooltip": true,
-      "GridProjection": false,
-      "HideWhenFaceDown": false,
-      "Hands": false,
-      "FogColor": "White",
-      "LuaScript": "",
-      "LuaScriptState": "",
-      "XmlUI": ""
-    },
-    {
-      "GUID": "090f39",
-      "Name": "HandTrigger",
-      "Transform": {
-        "posX": -7.82,
-        "posY": 4.81,
-        "posZ": 19.787817,
-        "rotX": 0.0,
-        "rotY": 180.0,
-        "rotZ": 0.0,
-        "scaleX": 11.7719707,
-        "scaleY": 9.174497,
-        "scaleZ": 4.871238
-      },
-      "Nickname": "",
-      "Description": "",
-      "GMNotes": "",
-      "AltLookAngle": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "ColorDiffuse": {
-        "r": 0.191999972,
-        "g": 0.701,
-        "b": 0.167999953,
-        "a": 0.0
-      },
-      "LayoutGroupSortIndex": 0,
-      "Value": 0,
-      "Locked": true,
-      "Grid": false,
-      "Snap": true,
-      "IgnoreFoW": false,
-      "MeasureMovement": false,
-      "DragSelectable": true,
-      "Autoraise": true,
-      "Sticky": true,
-      "Tooltip": true,
-      "GridProjection": false,
-      "HideWhenFaceDown": false,
-      "Hands": false,
-      "FogColor": "Green",
-      "LuaScript": "",
-      "LuaScriptState": "",
-      "XmlUI": ""
-    },
-    {
-      "GUID": "e27eb6",
-      "Name": "HandTrigger",
-      "Transform": {
-        "posX": 30.1035728,
-        "posY": 4.81034231,
-        "posZ": -8.449126,
-        "rotX": 0.0,
-        "rotY": 270.0,
-        "rotZ": 0.0,
-        "scaleX": 11.6554184,
-        "scaleY": 9.174497,
-        "scaleZ": 4.91995144
-      },
-      "Nickname": "",
-      "Description": "",
-      "GMNotes": "",
-      "AltLookAngle": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "ColorDiffuse": {
-        "r": 0.96,
-        "g": 0.438999981,
-        "b": 0.807,
-        "a": 0.0
-      },
-      "LayoutGroupSortIndex": 0,
-      "Value": 0,
-      "Locked": true,
-      "Grid": false,
-      "Snap": true,
-      "IgnoreFoW": false,
-      "MeasureMovement": false,
-      "DragSelectable": true,
-      "Autoraise": true,
-      "Sticky": true,
-      "Tooltip": true,
-      "GridProjection": false,
-      "HideWhenFaceDown": false,
-      "Hands": false,
-      "FogColor": "Pink",
-      "LuaScript": "",
-      "LuaScriptState": "",
-      "XmlUI": ""
-    },
-    {
-      "GUID": "82d0f5",
-      "Name": "HandTrigger",
-      "Transform": {
-        "posX": -30.247818,
-        "posY": 4.81034231,
-        "posZ": -8.822588,
-        "rotX": 0.0,
-        "rotY": 90.0,
-        "rotZ": 0.0,
-        "scaleX": 11.6554317,
-        "scaleY": 9.174497,
-        "scaleZ": 4.91995144
-      },
-      "Nickname": "",
-      "Description": "",
-      "GMNotes": "",
-      "AltLookAngle": {
-        "x": 0.0,
-        "y": 0.0,
-        "z": 0.0
-      },
-      "ColorDiffuse": {
-        "r": 0.9559999,
-        "g": 0.39199996,
-        "b": 0.112999953,
-        "a": 0.0
-      },
-      "LayoutGroupSortIndex": 0,
-      "Value": 0,
-      "Locked": true,
-      "Grid": false,
-      "Snap": true,
-      "IgnoreFoW": false,
-      "MeasureMovement": false,
-      "DragSelectable": true,
-      "Autoraise": true,
-      "Sticky": true,
-      "Tooltip": true,
-      "GridProjection": false,
-      "HideWhenFaceDown": false,
-      "Hands": false,
-      "FogColor": "Orange",
-      "LuaScript": "",
-      "LuaScriptState": "",
-      "XmlUI": ""
-    },
-    {
       "GUID": "a8af56",
       "Name": "Custom_PDF",
       "Transform": {
-        "posX": -0.36,
-        "posY": 14.4508286,
-        "posZ": 28.20668,
+        "posX": 45.315258,
+        "posY": 9.896243,
+        "posZ": 36.8652153,
         "rotX": 57.2599564,
-        "rotY": 179.983109,
-        "rotZ": -0.005048896,
+        "rotY": 180.0,
+        "rotZ": 359.99,
         "scaleX": 5.0,
         "scaleY": 1.0,
         "scaleZ": 5.0
@@ -649,12 +273,12 @@
       "GUID": "d92f83",
       "Name": "Deck",
       "Transform": {
-        "posX": -0.815649331,
-        "posY": 0.995372653,
+        "posX": -0.8156491,
+        "posY": 0.785741866,
         "posZ": 4.71021461,
-        "rotX": 5.939758E-08,
+        "rotX": -0.000250201032,
         "rotY": 180.000122,
-        "rotZ": 180.0,
+        "rotZ": 179.999222,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -888,11 +512,11 @@
       "Name": "Deck",
       "Transform": {
         "posX": -3.10317421,
-        "posY": 0.995372653,
+        "posY": 0.785711169,
         "posZ": 4.71021461,
-        "rotX": -1.01292574E-08,
+        "rotX": -0.0002503309,
         "rotY": 179.99469,
-        "rotZ": 180.0,
+        "rotZ": 179.999222,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -1126,11 +750,11 @@
       "Name": "Deck",
       "Transform": {
         "posX": -5.390699,
-        "posY": 0.995372653,
+        "posY": 0.785680652,
         "posZ": 4.71021461,
-        "rotX": -4.74017838E-08,
-        "rotY": 179.975418,
-        "rotZ": 180.0,
+        "rotX": -0.000250427,
+        "rotY": 179.975433,
+        "rotZ": 179.999237,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -1363,12 +987,12 @@
       "GUID": "84c7e0",
       "Name": "Deck",
       "Transform": {
-        "posX": 1.47187543,
-        "posY": 0.995372653,
+        "posX": 1.47187555,
+        "posY": 0.785772562,
         "posZ": 4.71021461,
-        "rotX": 1.13426964E-07,
-        "rotY": 179.999649,
-        "rotZ": 180.0,
+        "rotX": -0.000250262441,
+        "rotY": 179.999634,
+        "rotZ": 179.999237,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -1602,11 +1226,11 @@
       "Name": "Deck",
       "Transform": {
         "posX": 3.75940013,
-        "posY": 0.995372653,
+        "posY": 0.7858033,
         "posZ": 4.71021461,
-        "rotX": 8.362657E-08,
+        "rotX": -0.000250150129,
         "rotY": 180.0,
-        "rotZ": 180.0,
+        "rotZ": 179.999222,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -1839,12 +1463,12 @@
       "GUID": "ff8268",
       "Name": "Infinite_Bag",
       "Transform": {
-        "posX": -0.21612747,
-        "posY": 9.166237,
-        "posZ": 27.8076344,
-        "rotX": 5.23083645E-06,
-        "rotY": 0.0108839879,
-        "rotZ": 2.72234615E-06,
+        "posX": -0.183786467,
+        "posY": -10001.0107,
+        "posZ": 41.74431,
+        "rotX": -1.05110722E-07,
+        "rotY": 0.006233231,
+        "rotZ": -6.729268E-07,
         "scaleX": 1.0,
         "scaleY": 1.0,
         "scaleZ": 1.0
@@ -1886,15 +1510,15 @@
           "GUID": "8b4e77",
           "Name": "Custom_Token",
           "Transform": {
-            "posX": -28.89177,
-            "posY": 5.80487728,
-            "posZ": 17.8891563,
-            "rotX": 1.76974925E-06,
-            "rotY": 179.990692,
-            "rotZ": -5.859362E-06,
-            "scaleX": 2.607908,
+            "posX": -0.2930165,
+            "posY": 0.987379849,
+            "posZ": 39.5869446,
+            "rotX": 5.262343,
+            "rotY": 179.984009,
+            "rotZ": 359.966827,
+            "scaleX": 3.2,
             "scaleY": 1.0,
-            "scaleZ": 2.607908
+            "scaleZ": 3.2
           },
           "Nickname": "Game Sheet",
           "Description": "",
@@ -1945,11 +1569,11 @@
       "GUID": "d8c270",
       "Name": "Die_6",
       "Transform": {
-        "posX": -1.25470841,
-        "posY": 1.60502732,
-        "posZ": -0.174801588,
+        "posX": -1.2547574,
+        "posY": 1.395205,
+        "posZ": -0.174793929,
         "rotX": 270.0,
-        "rotY": 0.17677623,
+        "rotY": 0.171322152,
         "rotZ": 0.0,
         "scaleX": 1.6499995,
         "scaleY": 1.6499995,
@@ -2041,11 +1665,11 @@
       "GUID": "db4f84",
       "Name": "Die_6",
       "Transform": {
-        "posX": -0.0674144253,
-        "posY": 1.60481632,
-        "posZ": -0.174694985,
+        "posX": -0.0674582943,
+        "posY": 1.39522386,
+        "posZ": -0.174868211,
         "rotX": 270.0,
-        "rotY": 0.17262736,
+        "rotY": 0.166843221,
         "rotZ": 0.0,
         "scaleX": 1.6499995,
         "scaleY": 1.6499995,
@@ -2137,12 +1761,12 @@
       "GUID": "0f1ba4",
       "Name": "Custom_Tile",
       "Transform": {
-        "posX": -0.71781373,
-        "posY": 0.9599932,
-        "posZ": -0.420696348,
-        "rotX": 3.616448E-05,
+        "posX": -0.7178093,
+        "posY": 0.7503846,
+        "posZ": -0.420697749,
+        "rotX": -0.000207288409,
         "rotY": 180.000977,
-        "rotZ": -9.728053E-05,
+        "rotZ": -0.000883710163,
         "scaleX": 3.1190052,
         "scaleY": 1.0,
         "scaleZ": 3.1190052
@@ -2186,9 +1810,1677 @@
           "Stretch": true
         }
       },
-      "LuaScript": "--[[Coded by Exile]]\r\n\r\nfunction onLoad()\r\n    createUserInterface()\r\nend\r\n\r\nfunction createUserInterface()\r\n    self.createButton({\r\n        click_function = \"onRollClick\",\r\n        tooltip = \"Roll Dice\",\r\n        function_owner = self,\r\n        position = {0,0.1,.75},\r\n        height = 100,\r\n        width = 500,\r\n        font_size = 100,\r\n        color = TRANSPARENT,\r\n        label = 'Roll Dice'\r\n    })\r\n\r\n    self.createButton({\r\n        click_function = \"onRollClick\",\r\n        tooltip = \"Roll Dice\",\r\n        function_owner = self,\r\n        position = {0,-0.1,.75},\r\n        rotation = {0,0,180},\r\n        height = 100,\r\n        width = 500,\r\n        font_size = 100,\r\n        color = TRANSPARENT,\r\n        label = 'Roll Dice'\r\n    })\r\n\r\n    self.addContextMenuItem(\"Roll\",\r\n        function()\r\n            onRollClick()\r\n        end, false)\r\nend\r\n\r\nfunction onRollClick()\r\n    pos = self.getPosition()\r\n    pos.y = pos.y + 1\r\n\r\n    objectSize = self.getBoundsNormalized().size\r\n\r\n    zoneSpawn = {position = pos\r\n         , scale = {objectSize.x, 1, objectSize.z }\r\n         , type = 'ScriptingTrigger'\r\n         , callback = 'zoneCallback'\r\n         , callback_owner = self\r\n         , rotation = self.getRotation()\r\n         , color = TRANSPARENT}\r\n     spawnObject(zoneSpawn)\r\nend\r\n\r\nfunction zoneCallback(zone)\r\n    local diceObjects = {}\r\n    local diceCount = false\r\n\r\n    for _,o in ipairs(zone.getObjects()) do\r\n      if(o.type == \"Dice\") then\r\n          table.insert(diceObjects, {guid = o.getGUID(), value = 0})\r\n          o.roll()\r\n          diceCount = true\r\n      end\r\n    --do something with the objects\r\n    end\r\n\r\n    --waits for the dice to finish rolling\r\n    if(diceCount) then\r\n        Wait.time(function() sortDice(diceObjects) end, 3)\r\n    end\r\n\r\n    zone.destruct() --destroy the zone when you're done with it, to avoid clutter.\r\nend\r\n\r\n--sorts the dice by number\r\nfunction sortDice(diceGuids)\r\n    --prints guid\r\n    for _,o in ipairs(diceGuids) do\r\n        local dice = getObjectFromGUID(o.guid)\r\n        o.value =  dice.getValue()\r\n    end\r\n\r\n    local sorted_table = table.sort(diceGuids, function(a,b) return a.value < b.value end)\r\n\r\n    arrangeDice(sorted_table)\r\n    --prints sorting\r\n    --[[for _,o in ipairs(diceGuids) do\r\n        print(o.guid .. '-' .. o.value)\r\n    end]]\r\n\r\n    --getObjectFromGUID(string)\r\nend\r\n\r\nfunction arrangeDice(diceGuids)\r\n    local xOffset = -1.25 * self.getScale().x\r\n    local yOffset = 1.75 * self.getScale().y\r\n    local diceOffset = 1.25\r\n    local lastValue = nil\r\n\r\n    local xDice = 0\r\n    local yDice = 0\r\n\r\n    local rollerPos = self.getPosition()\r\n\r\n    for _,o in ipairs(diceGuids) do\r\n        local dice = getObjectFromGUID(o.guid)\r\n\r\n        if(lastValue != nil) then\r\n            if(lastValue < o.value) then\r\n                xDice = xDice + diceOffset\r\n                yDice = 0\r\n            elseif(lastValue == o.value) then\r\n                yDice = yDice - diceOffset\r\n            end\r\n        end\r\n\r\n        dice.setPositionSmooth({(rollerPos.x + xOffset + xDice), (rollerPos.y + 1), (rollerPos.z + yOffset + yDice) }, false, false)\r\n\r\n        lastValue = o.value\r\n    end\r\nend",
+      "LuaScript": "--[[Coded by Exile]]\r\n\r\nfunction onLoad()\r\n    createUserInterface()\r\nend\r\n\r\nfunction createUserInterface()\r\n    self.createButton({\r\n        click_function = \"onRollClick\",\r\n        tooltip = \"Roll Dice\",\r\n        function_owner = self,\r\n        position = {0,0.1,.75},\r\n        height = 100,\r\n        width = 500,\r\n        font_size = 100,\r\n        color = TRANSPARENT,\r\n        label = 'Roll Dice'\r\n    })\r\n\r\n    self.createButton({\r\n        click_function = \"onRollClick\",\r\n        tooltip = \"Roll Dice\",\r\n        function_owner = self,\r\n        position = {0,-0.1,.75},\r\n        rotation = {0,0,180},\r\n        height = 100,\r\n        width = 500,\r\n        font_size = 100,\r\n        color = TRANSPARENT,\r\n        label = 'Roll Dice'\r\n    })\r\n\r\n    self.addContextMenuItem(\"Roll\",\r\n        function()\r\n            onRollClick()\r\n        end, false)\r\nend\r\n\r\nfunction onRollClick()\r\n    pos = self.getPosition()\r\n    pos.y = pos.y + 1\r\n\r\n    objectSize = self.getBoundsNormalized().size\r\n\r\n    zoneSpawn = {position = pos\r\n         , scale = {objectSize.x, 1, objectSize.z }\r\n         , type = 'ScriptingTrigger'\r\n         , callback = 'zoneCallback'\r\n         , callback_owner = self\r\n         , rotation = self.getRotation()\r\n         , color = TRANSPARENT}\r\n     spawnObject(zoneSpawn)\r\nend\r\n\r\nfunction zoneCallback(zone)\r\n    local diceObjects = {}\r\n    local diceCount = false\r\n\r\n    for _,o in ipairs(zone.getObjects()) do\r\n      if(o.type == \"Dice\") then\r\n          table.insert(diceObjects, {guid = o.getGUID(), value = 0})\r\n          o.roll()\r\n          diceCount = true\r\n      end\r\n    --do something with the objects\r\n    end\r\n\r\n    --waits for the dice to finish rolling\r\n    if(diceCount) then\r\n        Wait.time(\r\n            function()\r\n                sortDice(diceObjects)\r\n            end,\r\n            3\r\n        )\r\n    end\r\n\r\n    zone.destruct() --destroy the zone when you're done with it, to avoid clutter.\r\nend\r\n\r\n--sorts the dice by number\r\nfunction sortDice(diceGuids)\r\n    --prints guid\r\n    for _,o in ipairs(diceGuids) do\r\n        local dice = getObjectFromGUID(o.guid)\r\n        o.value =  dice.getValue()\r\n    end\r\n\r\n    local sorted_table = table.sort(diceGuids, function(a,b) return a.value < b.value end)\r\n\r\n    -- announce values\r\n    local announcement = \"\"\r\n    for _, obj in ipairs(sorted_table) do\r\n        announcement = announcement .. \" ● \" .. obj.value\r\n    end\r\n    announcement = announcement:sub(4)\r\n    broadcastToAll(announcement)\r\n\r\n    arrangeDice(sorted_table)\r\n    --prints sorting\r\n    --[[for _,o in ipairs(diceGuids) do\r\n        print(o.guid .. '-' .. o.value)\r\n    end]]\r\n\r\n    --getObjectFromGUID(string)\r\nend\r\n\r\nfunction arrangeDice(diceGuids)\r\n    local xOffset = -1.25 * self.getScale().x\r\n    local yOffset = 1.75 * self.getScale().y\r\n    local diceOffset = 1.25\r\n    local lastValue = nil\r\n\r\n    local xDice = 0\r\n    local yDice = 0\r\n\r\n    local rollerPos = self.getPosition()\r\n\r\n    for _,o in ipairs(diceGuids) do\r\n        local dice = getObjectFromGUID(o.guid)\r\n\r\n        if(lastValue != nil) then\r\n            if(lastValue < o.value) then\r\n                xDice = xDice + diceOffset\r\n                yDice = 0\r\n            elseif(lastValue == o.value) then\r\n                yDice = yDice - diceOffset\r\n            end\r\n        end\r\n\r\n        dice.setPositionSmooth({(rollerPos.x + xOffset + xDice), (rollerPos.y + 1), (rollerPos.z + yOffset + yDice) }, false, false)\r\n\r\n        lastValue = o.value\r\n    end\r\nend",
       "LuaScriptState": "",
       "XmlUI": ""
+    },
+    {
+      "GUID": "0b2ed0",
+      "Name": "Custom_Assetbundle",
+      "Transform": {
+        "posX": 2.32830644E-09,
+        "posY": -41.99,
+        "posZ": 1.16415322E-09,
+        "rotX": 0.0,
+        "rotY": 180.0,
+        "rotZ": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "The Kraken Table",
+      "Description": "",
+      "GMNotes": "",
+      "AltLookAngle": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "ColorDiffuse": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0
+      },
+      "LayoutGroupSortIndex": 0,
+      "Value": 0,
+      "Locked": true,
+      "Grid": false,
+      "Snap": false,
+      "IgnoreFoW": false,
+      "MeasureMovement": false,
+      "DragSelectable": true,
+      "Autoraise": false,
+      "Sticky": true,
+      "Tooltip": false,
+      "GridProjection": false,
+      "HideWhenFaceDown": false,
+      "Hands": false,
+      "CustomAssetbundle": {
+        "AssetbundleURL": "http://cloud-3.steamusercontent.com/ugc/868496425808380193/6D743C154CD681FA1AC3535C6F55A62FBDB2C620/",
+        "AssetbundleSecondaryURL": "",
+        "MaterialIndex": 1,
+        "TypeIndex": 4,
+        "LoopingEffectIndex": 0
+      },
+      "LuaScript": "function onLoad()\r\n    self.interactable = false;\r\nend",
+      "LuaScriptState": "",
+      "XmlUI": "",
+      "PhysicsMaterial": {
+        "StaticFriction": 0.6,
+        "DynamicFriction": 0.6,
+        "Bounciness": 0.0,
+        "FrictionCombine": 0,
+        "BounceCombine": 0
+      },
+      "Rigidbody": {
+        "Mass": 118.0,
+        "Drag": 115.0,
+        "AngularDrag": 1E+14,
+        "UseGravity": false
+      }
+    },
+    {
+      "GUID": "ac7918",
+      "Name": "Custom_Assetbundle",
+      "Transform": {
+        "posX": 0.0,
+        "posY": -41.99,
+        "posZ": 0.0,
+        "rotX": 0.0,
+        "rotY": 180.0,
+        "rotZ": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "Extend",
+      "Description": "Click to add an extension to the table.",
+      "GMNotes": "",
+      "AltLookAngle": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "ColorDiffuse": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0
+      },
+      "LayoutGroupSortIndex": 0,
+      "Value": 0,
+      "Locked": true,
+      "Grid": false,
+      "Snap": false,
+      "IgnoreFoW": false,
+      "MeasureMovement": false,
+      "DragSelectable": true,
+      "Autoraise": false,
+      "Sticky": false,
+      "Tooltip": false,
+      "GridProjection": false,
+      "HideWhenFaceDown": false,
+      "Hands": false,
+      "CustomAssetbundle": {
+        "AssetbundleURL": "http://cloud-3.steamusercontent.com/ugc/868496425808427672/964B4FF361543B63A775D036814154F980F134AF/",
+        "AssetbundleSecondaryURL": "",
+        "MaterialIndex": 2,
+        "TypeIndex": 4,
+        "LoopingEffectIndex": 0
+      },
+      "LuaScript": "function onLoad()\r\n    self.interactable = false;\r\n    self.createButton({\r\n    label = \"\",\r\n    click_function = \"onButtonClick\",\r\n    function_owner = self,\r\n    width = 5000,\r\n    height = 1000,\r\n    color = {0, 0, 0, 0.0},\r\n    position = {62.4, 40.75, 0},\r\n    rotation = {0, 90, 90},\r\n    font_size = 200\r\n    })\r\nend\r\n\r\nfunction onButtonClick()\r\n    self.setState( 1 + (self.getStateId() % 2) )\r\n\r\nend",
+      "LuaScriptState": "",
+      "XmlUI": "",
+      "PhysicsMaterial": {
+        "StaticFriction": 0.6,
+        "DynamicFriction": 0.6,
+        "Bounciness": 0.0,
+        "FrictionCombine": 0,
+        "BounceCombine": 0
+      },
+      "Rigidbody": {
+        "Mass": 1E+14,
+        "Drag": 1E+17,
+        "AngularDrag": 1E+14,
+        "UseGravity": false
+      },
+      "States": {
+        "2": {
+          "GUID": "6e517a",
+          "Name": "Custom_Assetbundle",
+          "Transform": {
+            "posX": 0.0,
+            "posY": -41.99,
+            "posZ": 0.0,
+            "rotX": 0.0,
+            "rotY": 180.0,
+            "rotZ": 0.0,
+            "scaleX": 1.0,
+            "scaleY": 1.0,
+            "scaleZ": 1.0
+          },
+          "Nickname": "Table Extension",
+          "Description": "",
+          "GMNotes": "",
+          "AltLookAngle": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "ColorDiffuse": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0
+          },
+          "LayoutGroupSortIndex": 0,
+          "Value": 0,
+          "Locked": true,
+          "Grid": false,
+          "Snap": false,
+          "IgnoreFoW": false,
+          "MeasureMovement": false,
+          "DragSelectable": true,
+          "Autoraise": false,
+          "Sticky": true,
+          "Tooltip": false,
+          "GridProjection": false,
+          "Hands": false,
+          "CustomAssetbundle": {
+            "AssetbundleURL": "http://cloud-3.steamusercontent.com/ugc/868496546869694123/1567EBEAA6AA35068A6FFD335F3A773EDD17B48D/",
+            "AssetbundleSecondaryURL": "",
+            "MaterialIndex": 1,
+            "TypeIndex": 4,
+            "LoopingEffectIndex": 0
+          },
+          "LuaScript": "function onLoad()\r\n    self.interactable = false;\r\n    self.createButton({\r\n    label = \"\",\r\n    click_function = \"onButtonClick\",\r\n    function_owner = self,\r\n    width = 5000,\r\n    height = 1000,\r\n    color = {0, 0, 0, 0.0},\r\n    position = {62.4, 40.75, 0},\r\n    rotation = {0, 90, 90},\r\n    font_size = 200\r\n    })\r\nend\r\n\r\nfunction onButtonClick()\r\n    self.setState( 1 + (self.getStateId() % 2) )\r\n\r\nend",
+          "LuaScriptState": "",
+          "XmlUI": "",
+          "PhysicsMaterial": {
+            "StaticFriction": 0.6,
+            "DynamicFriction": 0.6,
+            "Bounciness": 0.0,
+            "FrictionCombine": 0,
+            "BounceCombine": 0
+          },
+          "Rigidbody": {
+            "Mass": 1E+09,
+            "Drag": 1E+15,
+            "AngularDrag": 1E+13,
+            "UseGravity": false
+          }
+        }
+      }
+    },
+    {
+      "GUID": "390971",
+      "Name": "Custom_Assetbundle",
+      "Transform": {
+        "posX": 36.0,
+        "posY": -41.99,
+        "posZ": 0.0,
+        "rotX": 0.0,
+        "rotY": 180.0,
+        "rotZ": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "Board Cabinet",
+      "Description": "Click to open.",
+      "GMNotes": "",
+      "AltLookAngle": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "ColorDiffuse": {
+        "r": 0.249994874,
+        "g": 0.249994874,
+        "b": 0.249994874
+      },
+      "LayoutGroupSortIndex": 0,
+      "Value": 0,
+      "Locked": true,
+      "Grid": false,
+      "Snap": false,
+      "IgnoreFoW": false,
+      "MeasureMovement": false,
+      "DragSelectable": true,
+      "Autoraise": false,
+      "Sticky": true,
+      "Tooltip": false,
+      "GridProjection": false,
+      "HideWhenFaceDown": false,
+      "Hands": false,
+      "CustomAssetbundle": {
+        "AssetbundleURL": "http://cloud-3.steamusercontent.com/ugc/868496425808274507/801DDE162A6431250F18BADB2306A54FE4F9FAFF/",
+        "AssetbundleSecondaryURL": "",
+        "MaterialIndex": 1,
+        "TypeIndex": 4,
+        "LoopingEffectIndex": 0
+      },
+      "LuaScript": "function onLoad()\r\n    self.interactable = false;\r\n    self.createButton({\r\n    label = \"\",\r\n    click_function = \"onButtonClick\",\r\n    function_owner = self,\r\n    width = 1000,\r\n    height = 750,\r\n    color = {1, 0, 0, 0.0},\r\n    position = {0, 40.7, 32.8},\r\n    rotation = {-90, 0, 0},\r\n    font_size = 200\r\n    })\r\nend\r\n\r\nfunction onButtonClick()\r\n    self.setState( 1 + (self.getStateId() % 2) )\r\n\r\nend",
+      "LuaScriptState": "",
+      "XmlUI": "",
+      "PhysicsMaterial": {
+        "StaticFriction": 0.6,
+        "DynamicFriction": 0.6,
+        "Bounciness": 0.0,
+        "FrictionCombine": 0,
+        "BounceCombine": 0
+      },
+      "Rigidbody": {
+        "Mass": 1.0,
+        "Drag": 0.1,
+        "AngularDrag": 0.1,
+        "UseGravity": false
+      },
+      "States": {
+        "2": {
+          "GUID": "0c8d35",
+          "Name": "Custom_Assetbundle",
+          "Transform": {
+            "posX": 36.0,
+            "posY": -41.99,
+            "posZ": 0.0,
+            "rotX": 0.0,
+            "rotY": 180.0,
+            "rotZ": 0.0,
+            "scaleX": 1.0,
+            "scaleY": 1.0,
+            "scaleZ": 1.0
+          },
+          "Nickname": "Board Cabinet (Drawn)",
+          "Description": "Click on the handle to close.",
+          "GMNotes": "",
+          "AltLookAngle": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "ColorDiffuse": {
+            "r": 0.249998569,
+            "g": 0.249998569,
+            "b": 0.249998569
+          },
+          "LayoutGroupSortIndex": 0,
+          "Value": 0,
+          "Locked": true,
+          "Grid": false,
+          "Snap": false,
+          "IgnoreFoW": false,
+          "MeasureMovement": false,
+          "DragSelectable": true,
+          "Autoraise": false,
+          "Sticky": true,
+          "Tooltip": false,
+          "GridProjection": false,
+          "HideWhenFaceDown": false,
+          "Hands": false,
+          "CustomAssetbundle": {
+            "AssetbundleURL": "http://cloud-3.steamusercontent.com/ugc/868496425808279018/1BE1733E66A6D19385888B136F4E6DEDFC257969/",
+            "AssetbundleSecondaryURL": "",
+            "MaterialIndex": 1,
+            "TypeIndex": 4,
+            "LoopingEffectIndex": 0
+          },
+          "LuaScript": "local ConcealedStorageHeight = 3.0\nlocal ConceiledStorageOffset = 10000.0\nlocal StorageState = 1\nlocal ObjectLockStates = {}\n\nlocal BB = {\n\tMin = {\n\t\tx = -16.0,\n\t\ty = 41.99,\n\t\tz = -50.0\n\t},\n\tMax = {\n\t\tx = 16.0,\n\t\ty = 41.99,\n\t\tz = -32.0\n\t}\n}\n\nfunction onSave()\n    local saveObj = {};\n\t\n    for k,v in pairs( ObjectLockStates ) do\n        if v ~= nil then\n\t\t\tsaveObj[k] = v;\n        end\n    end\n\t\n    return JSON.encode( saveObj );\nend\n\nfunction onLoad( saveData )\n    self.interactable = false;\n\t\n\tif saveData ~= \"\" then\n\t\tObjectLockStates = JSON.decode( saveData ) or {};\n\tend\n\t\n    self.createButton({\n\t\tlabel = \"\",\n\t\tclick_function = \"onButtonClick\",\n\t\tfunction_owner = self,\n\t\twidth = 1000,\n\t\theight = 750,\n\t\tcolor = {1, 0, 0, 0.0},\n\t\tposition = {0, 40.7, 50.5},\n\t\trotation = {-90, 0, 0},\n\t\tfont_size = 200\n    })\n\t\n\tif self.getStateId() ~= StorageState then\n\t\tTimer.create({\n\t\t\tidentifier = (\"onAfterLoad\" .. self.guid),\n\t\t\tfunction_name = \"onAfterLoad\",\n\t\t\tdelay = 0.2\n\t\t})\n\tend\nend\n\nfunction onAfterLoad()\n\tlocal pos = self.getPosition()\n\tlocal bounds = self.getBoundsNormalized()\n\tlocal rot = self.getRotation()\n\tlocal direction = 1.0\n\t\n\tif rot.y == 0 then\n\t\tdirection = -1.0\n\tend\n\t\n\tBB.Min.x = BB.Min.x + pos.x\n\tBB.Min.y = BB.Min.y + pos.y - 1.5\n\tBB.Min.z = (BB.Min.z * direction) + pos.z\n\t\n\tBB.Max.x = \tBB.Max.x + pos.x\n\tBB.Max.y = \tBB.Max.y + pos.y + ConcealedStorageHeight + 0.5\n\tBB.Max.z = (BB.Max.z * direction) + pos.z\n\t\n\tHideObjectsAbove( false )\nend\n\nfunction onButtonClick()\n\tlocal currentState = self.getStateId()\n\tlocal nextState = 1 + (currentState % 2)\n\t\n\tif currentState ~= StorageState then\n\t\tHideObjectsAbove( true )\n\tend\n\t\n\tself.script_state = onSave()\n\tself.setState( nextState )\nend\n\nfunction HideObjectsAbove( toggle )\n    local objectsAbove = {}\n\tlocal BBMin = { x = BB.Min.x, y = BB.Min.y, z = BB.Min.z }\n\tlocal BBMax = { x = BB.Max.x, y = BB.Max.y, z = BB.Max.z }\n\t\n\tif not toggle then\n\t\tBBMin.y = BBMin.y - ConceiledStorageOffset\n\t\tBBMax.y = BBMax.y - ConceiledStorageOffset\n\tend\n    \n    for k,v in pairs( getAllObjects() ) do\n        if v != self then\n            if PointToAABBIntersect( BBMin, BBMax, v.getPosition() ) then\n                if toggle then\n                    Store( v )\n                else\n                    Dispense( v )\n                end\n            end\n        end\n    end\nend\n\n-- Assumes ||min|| < ||max||\nfunction PointToAABBIntersect( min, max, point )\n    if IsInRange( point.x, min.x, max.x ) and\n       IsInRange( point.y, min.y, max.y ) and\n       IsInRange( point.z, min.z, max.z ) then\n\t   return true\n    end\n    \n    return false\nend\n\nfunction IsInRange( value, a, b )\n\tlocal min = 0\n\tlocal max = 0\n\t\n\tif a > b then\n\t\tmax = a\n\t\tmin = b\n\telse\n\t\tmax = b\n\t\tmin = a\n\tend\n\t\n\tif value > min and value < max then\n\t\treturn true\n\tend\n\t\n\treturn false\nend\n\nfunction Store( obj )\n\tlocal pos = obj.getPosition()\n\tlocal isLocked = obj.getLock()\n\t\n\tObjectLockStates[obj.getGUID()] = isLocked;\n\t\n    obj.interactable = false\n    obj.setLock( true )\n    obj.setPosition({\n        x = pos.x,\n        y = pos.y - ConceiledStorageOffset,\n        z = pos.z\n    })\nend\n\nfunction Dispense( obj )\n\tlocal pos = obj.getPosition()\n\tlocal originalLockStatus = ObjectLockStates[obj.getGUID()] or false\n\t\n\tObjectLockStates[obj.getGUID()] = nil\n\t\n    obj.setPosition({\n        x = pos.x,\n        y = pos.y + ConceiledStorageOffset,\n        z = pos.z\n    })\n\t\n    obj.interactable = true\n\tobj.setLock( originalLockStatus or false )\nend",
+          "LuaScriptState": "[]",
+          "XmlUI": "",
+          "PhysicsMaterial": {
+            "StaticFriction": 0.6,
+            "DynamicFriction": 0.6,
+            "Bounciness": 0.0,
+            "FrictionCombine": 0,
+            "BounceCombine": 0
+          },
+          "Rigidbody": {
+            "Mass": 1.0,
+            "Drag": 0.1,
+            "AngularDrag": 0.1,
+            "UseGravity": false
+          }
+        }
+      }
+    },
+    {
+      "GUID": "b1ab11",
+      "Name": "Custom_Assetbundle",
+      "Transform": {
+        "posX": 0.0,
+        "posY": -41.99,
+        "posZ": 0.0,
+        "rotX": 0.0,
+        "rotY": 180.0,
+        "rotZ": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "Board Cabinet",
+      "Description": "Click to open.",
+      "GMNotes": "",
+      "AltLookAngle": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "ColorDiffuse": {
+        "r": 0.249994367,
+        "g": 0.249994367,
+        "b": 0.249994367
+      },
+      "LayoutGroupSortIndex": 0,
+      "Value": 0,
+      "Locked": true,
+      "Grid": false,
+      "Snap": false,
+      "IgnoreFoW": false,
+      "MeasureMovement": false,
+      "DragSelectable": true,
+      "Autoraise": false,
+      "Sticky": true,
+      "Tooltip": false,
+      "GridProjection": false,
+      "HideWhenFaceDown": false,
+      "Hands": false,
+      "CustomAssetbundle": {
+        "AssetbundleURL": "http://cloud-3.steamusercontent.com/ugc/868496425808274507/801DDE162A6431250F18BADB2306A54FE4F9FAFF/",
+        "AssetbundleSecondaryURL": "",
+        "MaterialIndex": 1,
+        "TypeIndex": 4,
+        "LoopingEffectIndex": 0
+      },
+      "LuaScript": "function onLoad()\r\n    self.interactable = false;\r\n    self.createButton({\r\n    label = \"\",\r\n    click_function = \"onButtonClick\",\r\n    function_owner = self,\r\n    width = 1000,\r\n    height = 750,\r\n    color = {1, 0, 0, 0.0},\r\n    position = {0, 40.7, 32.8},\r\n    rotation = {-90, 0, 0},\r\n    font_size = 200\r\n    })\r\nend\r\n\r\nfunction onButtonClick()\r\n    self.setState( 1 + (self.getStateId() % 2) )\r\n\r\nend",
+      "LuaScriptState": "",
+      "XmlUI": "",
+      "PhysicsMaterial": {
+        "StaticFriction": 0.6,
+        "DynamicFriction": 0.6,
+        "Bounciness": 0.0,
+        "FrictionCombine": 0,
+        "BounceCombine": 0
+      },
+      "Rigidbody": {
+        "Mass": 1.0,
+        "Drag": 0.1,
+        "AngularDrag": 0.1,
+        "UseGravity": false
+      },
+      "States": {
+        "2": {
+          "GUID": "665355",
+          "Name": "Custom_Assetbundle",
+          "Transform": {
+            "posX": 0.0,
+            "posY": -41.99,
+            "posZ": 0.0,
+            "rotX": 0.0,
+            "rotY": 180.0,
+            "rotZ": 0.0,
+            "scaleX": 1.0,
+            "scaleY": 1.0,
+            "scaleZ": 1.0
+          },
+          "Nickname": "Board Cabinet (Drawn)",
+          "Description": "Click on the handle to close.",
+          "GMNotes": "",
+          "AltLookAngle": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "ColorDiffuse": {
+            "r": 0.2499981,
+            "g": 0.2499981,
+            "b": 0.2499981
+          },
+          "LayoutGroupSortIndex": 0,
+          "Value": 0,
+          "Locked": true,
+          "Grid": false,
+          "Snap": false,
+          "IgnoreFoW": false,
+          "MeasureMovement": false,
+          "DragSelectable": true,
+          "Autoraise": false,
+          "Sticky": true,
+          "Tooltip": false,
+          "GridProjection": false,
+          "HideWhenFaceDown": false,
+          "Hands": false,
+          "CustomAssetbundle": {
+            "AssetbundleURL": "http://cloud-3.steamusercontent.com/ugc/868496425808279018/1BE1733E66A6D19385888B136F4E6DEDFC257969/",
+            "AssetbundleSecondaryURL": "",
+            "MaterialIndex": 1,
+            "TypeIndex": 4,
+            "LoopingEffectIndex": 0
+          },
+          "LuaScript": "local ConcealedStorageHeight = 3.0\nlocal ConceiledStorageOffset = 10000.0\nlocal StorageState = 1\nlocal ObjectLockStates = {}\n\nlocal BB = {\n\tMin = {\n\t\tx = -16.0,\n\t\ty = 41.99,\n\t\tz = -50.0\n\t},\n\tMax = {\n\t\tx = 16.0,\n\t\ty = 41.99,\n\t\tz = -32.0\n\t}\n}\n\nfunction onSave()\n    local saveObj = {};\n\t\n    for k,v in pairs( ObjectLockStates ) do\n        if v ~= nil then\n\t\t\tsaveObj[k] = v;\n        end\n    end\n\t\n    return JSON.encode( saveObj );\nend\n\nfunction onLoad( saveData )\n    self.interactable = false;\n\t\n\tif saveData ~= \"\" then\n\t\tObjectLockStates = JSON.decode( saveData ) or {};\n\tend\n\t\n    self.createButton({\n\t\tlabel = \"\",\n\t\tclick_function = \"onButtonClick\",\n\t\tfunction_owner = self,\n\t\twidth = 1000,\n\t\theight = 750,\n\t\tcolor = {1, 0, 0, 0.0},\n\t\tposition = {0, 40.7, 50.5},\n\t\trotation = {-90, 0, 0},\n\t\tfont_size = 200\n    })\n\t\n\tif self.getStateId() ~= StorageState then\n\t\tTimer.create({\n\t\t\tidentifier = (\"onAfterLoad\" .. self.guid),\n\t\t\tfunction_name = \"onAfterLoad\",\n\t\t\tdelay = 0.2\n\t\t})\n\tend\nend\n\nfunction onAfterLoad()\n\tlocal pos = self.getPosition()\n\tlocal bounds = self.getBoundsNormalized()\n\tlocal rot = self.getRotation()\n\tlocal direction = 1.0\n\t\n\tif rot.y == 0 then\n\t\tdirection = -1.0\n\tend\n\t\n\tBB.Min.x = BB.Min.x + pos.x\n\tBB.Min.y = BB.Min.y + pos.y - 1.5\n\tBB.Min.z = (BB.Min.z * direction) + pos.z\n\t\n\tBB.Max.x = \tBB.Max.x + pos.x\n\tBB.Max.y = \tBB.Max.y + pos.y + ConcealedStorageHeight + 0.5\n\tBB.Max.z = (BB.Max.z * direction) + pos.z\n\t\n\tHideObjectsAbove( false )\nend\n\nfunction onButtonClick()\n\tlocal currentState = self.getStateId()\n\tlocal nextState = 1 + (currentState % 2)\n\t\n\tif currentState ~= StorageState then\n\t\tHideObjectsAbove( true )\n\tend\n\t\n\tself.script_state = onSave()\n\tself.setState( nextState )\nend\n\nfunction HideObjectsAbove( toggle )\n    local objectsAbove = {}\n\tlocal BBMin = { x = BB.Min.x, y = BB.Min.y, z = BB.Min.z }\n\tlocal BBMax = { x = BB.Max.x, y = BB.Max.y, z = BB.Max.z }\n\t\n\tif not toggle then\n\t\tBBMin.y = BBMin.y - ConceiledStorageOffset\n\t\tBBMax.y = BBMax.y - ConceiledStorageOffset\n\tend\n    \n    for k,v in pairs( getAllObjects() ) do\n        if v != self then\n            if PointToAABBIntersect( BBMin, BBMax, v.getPosition() ) then\n                if toggle then\n                    Store( v )\n                else\n                    Dispense( v )\n                end\n            end\n        end\n    end\nend\n\n-- Assumes ||min|| < ||max||\nfunction PointToAABBIntersect( min, max, point )\n    if IsInRange( point.x, min.x, max.x ) and\n       IsInRange( point.y, min.y, max.y ) and\n       IsInRange( point.z, min.z, max.z ) then\n\t   return true\n    end\n    \n    return false\nend\n\nfunction IsInRange( value, a, b )\n\tlocal min = 0\n\tlocal max = 0\n\t\n\tif a > b then\n\t\tmax = a\n\t\tmin = b\n\telse\n\t\tmax = b\n\t\tmin = a\n\tend\n\t\n\tif value > min and value < max then\n\t\treturn true\n\tend\n\t\n\treturn false\nend\n\nfunction Store( obj )\n\tlocal pos = obj.getPosition()\n\tlocal isLocked = obj.getLock()\n\t\n\tObjectLockStates[obj.getGUID()] = isLocked;\n\t\n    obj.interactable = false\n    obj.setLock( true )\n    obj.setPosition({\n        x = pos.x,\n        y = pos.y - ConceiledStorageOffset,\n        z = pos.z\n    })\nend\n\nfunction Dispense( obj )\n\tlocal pos = obj.getPosition()\n\tlocal originalLockStatus = ObjectLockStates[obj.getGUID()] or false\n\t\n\tObjectLockStates[obj.getGUID()] = nil\n\t\n    obj.setPosition({\n        x = pos.x,\n        y = pos.y + ConceiledStorageOffset,\n        z = pos.z\n    })\n\t\n    obj.interactable = true\n\tobj.setLock( originalLockStatus or false )\nend",
+          "LuaScriptState": "[]",
+          "XmlUI": "",
+          "PhysicsMaterial": {
+            "StaticFriction": 0.6,
+            "DynamicFriction": 0.6,
+            "Bounciness": 0.0,
+            "FrictionCombine": 0,
+            "BounceCombine": 0
+          },
+          "Rigidbody": {
+            "Mass": 1.0,
+            "Drag": 0.1,
+            "AngularDrag": 0.1,
+            "UseGravity": false
+          }
+        }
+      }
+    },
+    {
+      "GUID": "e2b080",
+      "Name": "Custom_Assetbundle",
+      "Transform": {
+        "posX": -36.0,
+        "posY": -41.99,
+        "posZ": 0.0,
+        "rotX": 0.0,
+        "rotY": 180.0,
+        "rotZ": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "Board Cabinet",
+      "Description": "Click to open.",
+      "GMNotes": "",
+      "AltLookAngle": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "ColorDiffuse": {
+        "r": 0.249995112,
+        "g": 0.249995112,
+        "b": 0.249995112
+      },
+      "LayoutGroupSortIndex": 0,
+      "Value": 0,
+      "Locked": true,
+      "Grid": false,
+      "Snap": false,
+      "IgnoreFoW": false,
+      "MeasureMovement": false,
+      "DragSelectable": true,
+      "Autoraise": false,
+      "Sticky": true,
+      "Tooltip": false,
+      "GridProjection": false,
+      "HideWhenFaceDown": false,
+      "Hands": false,
+      "CustomAssetbundle": {
+        "AssetbundleURL": "http://cloud-3.steamusercontent.com/ugc/868496425808274507/801DDE162A6431250F18BADB2306A54FE4F9FAFF/",
+        "AssetbundleSecondaryURL": "",
+        "MaterialIndex": 1,
+        "TypeIndex": 4,
+        "LoopingEffectIndex": 0
+      },
+      "LuaScript": "function onLoad()\r\n    self.interactable = false;\r\n    self.createButton({\r\n    label = \"\",\r\n    click_function = \"onButtonClick\",\r\n    function_owner = self,\r\n    width = 1000,\r\n    height = 750,\r\n    color = {1, 0, 0, 0.0},\r\n    position = {0, 40.7, 32.8},\r\n    rotation = {-90, 0, 0},\r\n    font_size = 200\r\n    })\r\nend\r\n\r\nfunction onButtonClick()\r\n    self.setState( 1 + (self.getStateId() % 2) )\r\n\r\nend",
+      "LuaScriptState": "",
+      "XmlUI": "",
+      "PhysicsMaterial": {
+        "StaticFriction": 0.6,
+        "DynamicFriction": 0.6,
+        "Bounciness": 0.0,
+        "FrictionCombine": 0,
+        "BounceCombine": 0
+      },
+      "Rigidbody": {
+        "Mass": 1.0,
+        "Drag": 0.1,
+        "AngularDrag": 0.1,
+        "UseGravity": false
+      },
+      "States": {
+        "2": {
+          "GUID": "3c4e81",
+          "Name": "Custom_Assetbundle",
+          "Transform": {
+            "posX": -36.0,
+            "posY": -41.99,
+            "posZ": 0.0,
+            "rotX": 0.0,
+            "rotY": 180.0,
+            "rotZ": 0.0,
+            "scaleX": 1.0,
+            "scaleY": 1.0,
+            "scaleZ": 1.0
+          },
+          "Nickname": "Board Cabinet (Drawn)",
+          "Description": "Click on the handle to close.",
+          "GMNotes": "",
+          "AltLookAngle": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "ColorDiffuse": {
+            "r": 0.249998778,
+            "g": 0.249998778,
+            "b": 0.249998778
+          },
+          "LayoutGroupSortIndex": 0,
+          "Value": 0,
+          "Locked": true,
+          "Grid": false,
+          "Snap": false,
+          "IgnoreFoW": false,
+          "MeasureMovement": false,
+          "DragSelectable": true,
+          "Autoraise": false,
+          "Sticky": true,
+          "Tooltip": false,
+          "GridProjection": false,
+          "HideWhenFaceDown": false,
+          "Hands": false,
+          "CustomAssetbundle": {
+            "AssetbundleURL": "http://cloud-3.steamusercontent.com/ugc/868496425808279018/1BE1733E66A6D19385888B136F4E6DEDFC257969/",
+            "AssetbundleSecondaryURL": "",
+            "MaterialIndex": 1,
+            "TypeIndex": 4,
+            "LoopingEffectIndex": 0
+          },
+          "LuaScript": "local ConcealedStorageHeight = 3.0\nlocal ConceiledStorageOffset = 10000.0\nlocal StorageState = 1\nlocal ObjectLockStates = {}\n\nlocal BB = {\n\tMin = {\n\t\tx = -16.0,\n\t\ty = 41.99,\n\t\tz = -50.0\n\t},\n\tMax = {\n\t\tx = 16.0,\n\t\ty = 41.99,\n\t\tz = -32.0\n\t}\n}\n\nfunction onSave()\n    local saveObj = {};\n\t\n    for k,v in pairs( ObjectLockStates ) do\n        if v ~= nil then\n\t\t\tsaveObj[k] = v;\n        end\n    end\n\t\n    return JSON.encode( saveObj );\nend\n\nfunction onLoad( saveData )\n    self.interactable = false;\n\t\n\tif saveData ~= \"\" then\n\t\tObjectLockStates = JSON.decode( saveData ) or {};\n\tend\n\t\n    self.createButton({\n\t\tlabel = \"\",\n\t\tclick_function = \"onButtonClick\",\n\t\tfunction_owner = self,\n\t\twidth = 1000,\n\t\theight = 750,\n\t\tcolor = {1, 0, 0, 0.0},\n\t\tposition = {0, 40.7, 50.5},\n\t\trotation = {-90, 0, 0},\n\t\tfont_size = 200\n    })\n\t\n\tif self.getStateId() ~= StorageState then\n\t\tTimer.create({\n\t\t\tidentifier = (\"onAfterLoad\" .. self.guid),\n\t\t\tfunction_name = \"onAfterLoad\",\n\t\t\tdelay = 0.2\n\t\t})\n\tend\nend\n\nfunction onAfterLoad()\n\tlocal pos = self.getPosition()\n\tlocal bounds = self.getBoundsNormalized()\n\tlocal rot = self.getRotation()\n\tlocal direction = 1.0\n\t\n\tif rot.y == 0 then\n\t\tdirection = -1.0\n\tend\n\t\n\tBB.Min.x = BB.Min.x + pos.x\n\tBB.Min.y = BB.Min.y + pos.y - 1.5\n\tBB.Min.z = (BB.Min.z * direction) + pos.z\n\t\n\tBB.Max.x = \tBB.Max.x + pos.x\n\tBB.Max.y = \tBB.Max.y + pos.y + ConcealedStorageHeight + 0.5\n\tBB.Max.z = (BB.Max.z * direction) + pos.z\n\t\n\tHideObjectsAbove( false )\nend\n\nfunction onButtonClick()\n\tlocal currentState = self.getStateId()\n\tlocal nextState = 1 + (currentState % 2)\n\t\n\tif currentState ~= StorageState then\n\t\tHideObjectsAbove( true )\n\tend\n\t\n\tself.script_state = onSave()\n\tself.setState( nextState )\nend\n\nfunction HideObjectsAbove( toggle )\n    local objectsAbove = {}\n\tlocal BBMin = { x = BB.Min.x, y = BB.Min.y, z = BB.Min.z }\n\tlocal BBMax = { x = BB.Max.x, y = BB.Max.y, z = BB.Max.z }\n\t\n\tif not toggle then\n\t\tBBMin.y = BBMin.y - ConceiledStorageOffset\n\t\tBBMax.y = BBMax.y - ConceiledStorageOffset\n\tend\n    \n    for k,v in pairs( getAllObjects() ) do\n        if v != self then\n            if PointToAABBIntersect( BBMin, BBMax, v.getPosition() ) then\n                if toggle then\n                    Store( v )\n                else\n                    Dispense( v )\n                end\n            end\n        end\n    end\nend\n\n-- Assumes ||min|| < ||max||\nfunction PointToAABBIntersect( min, max, point )\n    if IsInRange( point.x, min.x, max.x ) and\n       IsInRange( point.y, min.y, max.y ) and\n       IsInRange( point.z, min.z, max.z ) then\n\t   return true\n    end\n    \n    return false\nend\n\nfunction IsInRange( value, a, b )\n\tlocal min = 0\n\tlocal max = 0\n\t\n\tif a > b then\n\t\tmax = a\n\t\tmin = b\n\telse\n\t\tmax = b\n\t\tmin = a\n\tend\n\t\n\tif value > min and value < max then\n\t\treturn true\n\tend\n\t\n\treturn false\nend\n\nfunction Store( obj )\n\tlocal pos = obj.getPosition()\n\tlocal isLocked = obj.getLock()\n\t\n\tObjectLockStates[obj.getGUID()] = isLocked;\n\t\n    obj.interactable = false\n    obj.setLock( true )\n    obj.setPosition({\n        x = pos.x,\n        y = pos.y - ConceiledStorageOffset,\n        z = pos.z\n    })\nend\n\nfunction Dispense( obj )\n\tlocal pos = obj.getPosition()\n\tlocal originalLockStatus = ObjectLockStates[obj.getGUID()] or false\n\t\n\tObjectLockStates[obj.getGUID()] = nil\n\t\n    obj.setPosition({\n        x = pos.x,\n        y = pos.y + ConceiledStorageOffset,\n        z = pos.z\n    })\n\t\n    obj.interactable = true\n\tobj.setLock( originalLockStatus or false )\nend",
+          "LuaScriptState": "[]",
+          "XmlUI": "",
+          "PhysicsMaterial": {
+            "StaticFriction": 0.6,
+            "DynamicFriction": 0.6,
+            "Bounciness": 0.0,
+            "FrictionCombine": 0,
+            "BounceCombine": 0
+          },
+          "Rigidbody": {
+            "Mass": 1.0,
+            "Drag": 0.1,
+            "AngularDrag": 0.1,
+            "UseGravity": false
+          }
+        }
+      }
+    },
+    {
+      "GUID": "2fa11f",
+      "Name": "Custom_Assetbundle",
+      "Transform": {
+        "posX": -36.0,
+        "posY": -41.99,
+        "posZ": 0.0,
+        "rotX": 0.0,
+        "rotY": 0.0,
+        "rotZ": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "Board Cabinet",
+      "Description": "Click to open.",
+      "GMNotes": "",
+      "AltLookAngle": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "ColorDiffuse": {
+        "r": 0.249995261,
+        "g": 0.249995261,
+        "b": 0.249995261
+      },
+      "LayoutGroupSortIndex": 0,
+      "Value": 0,
+      "Locked": true,
+      "Grid": false,
+      "Snap": false,
+      "IgnoreFoW": false,
+      "MeasureMovement": false,
+      "DragSelectable": true,
+      "Autoraise": false,
+      "Sticky": true,
+      "Tooltip": false,
+      "GridProjection": false,
+      "HideWhenFaceDown": false,
+      "Hands": false,
+      "CustomAssetbundle": {
+        "AssetbundleURL": "http://cloud-3.steamusercontent.com/ugc/868496425808274507/801DDE162A6431250F18BADB2306A54FE4F9FAFF/",
+        "AssetbundleSecondaryURL": "",
+        "MaterialIndex": 1,
+        "TypeIndex": 4,
+        "LoopingEffectIndex": 0
+      },
+      "LuaScript": "function onLoad()\r\n    self.interactable = false;\r\n    self.createButton({\r\n    label = \"\",\r\n    click_function = \"onButtonClick\",\r\n    function_owner = self,\r\n    width = 1000,\r\n    height = 750,\r\n    color = {1, 0, 0, 0.0},\r\n    position = {0, 40.7, 32.8},\r\n    rotation = {-90, 0, 0},\r\n    font_size = 200\r\n    })\r\nend\r\n\r\nfunction onButtonClick()\r\n    self.setState( 1 + (self.getStateId() % 2) )\r\n\r\nend",
+      "LuaScriptState": "",
+      "XmlUI": "",
+      "PhysicsMaterial": {
+        "StaticFriction": 0.6,
+        "DynamicFriction": 0.6,
+        "Bounciness": 0.0,
+        "FrictionCombine": 0,
+        "BounceCombine": 0
+      },
+      "Rigidbody": {
+        "Mass": 1.0,
+        "Drag": 0.1,
+        "AngularDrag": 0.1,
+        "UseGravity": false
+      },
+      "States": {
+        "2": {
+          "GUID": "88b8d6",
+          "Name": "Custom_Assetbundle",
+          "Transform": {
+            "posX": -36.0,
+            "posY": -41.99,
+            "posZ": 0.0,
+            "rotX": 0.0,
+            "rotY": 0.0,
+            "rotZ": 0.0,
+            "scaleX": 1.0,
+            "scaleY": 1.0,
+            "scaleZ": 1.0
+          },
+          "Nickname": "Board Cabinet (Drawn)",
+          "Description": "Click on the handle to close.",
+          "GMNotes": "",
+          "AltLookAngle": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "ColorDiffuse": {
+            "r": 0.2499989,
+            "g": 0.2499989,
+            "b": 0.2499989
+          },
+          "LayoutGroupSortIndex": 0,
+          "Value": 0,
+          "Locked": true,
+          "Grid": false,
+          "Snap": false,
+          "IgnoreFoW": false,
+          "MeasureMovement": false,
+          "DragSelectable": true,
+          "Autoraise": false,
+          "Sticky": true,
+          "Tooltip": false,
+          "GridProjection": false,
+          "HideWhenFaceDown": false,
+          "Hands": false,
+          "CustomAssetbundle": {
+            "AssetbundleURL": "http://cloud-3.steamusercontent.com/ugc/868496425808279018/1BE1733E66A6D19385888B136F4E6DEDFC257969/",
+            "AssetbundleSecondaryURL": "",
+            "MaterialIndex": 1,
+            "TypeIndex": 4,
+            "LoopingEffectIndex": 0
+          },
+          "LuaScript": "local ConcealedStorageHeight = 3.0\nlocal ConceiledStorageOffset = 10000.0\nlocal StorageState = 1\nlocal ObjectLockStates = {}\n\nlocal BB = {\n\tMin = {\n\t\tx = -16.0,\n\t\ty = 41.99,\n\t\tz = -50.0\n\t},\n\tMax = {\n\t\tx = 16.0,\n\t\ty = 41.99,\n\t\tz = -32.0\n\t}\n}\n\nfunction onSave()\n    local saveObj = {};\n\t\n    for k,v in pairs( ObjectLockStates ) do\n        if v ~= nil then\n\t\t\tsaveObj[k] = v;\n        end\n    end\n\t\n    return JSON.encode( saveObj );\nend\n\nfunction onLoad( saveData )\n    self.interactable = false;\n\t\n\tif saveData ~= \"\" then\n\t\tObjectLockStates = JSON.decode( saveData ) or {};\n\tend\n\t\n    self.createButton({\n\t\tlabel = \"\",\n\t\tclick_function = \"onButtonClick\",\n\t\tfunction_owner = self,\n\t\twidth = 1000,\n\t\theight = 750,\n\t\tcolor = {1, 0, 0, 0.0},\n\t\tposition = {0, 40.7, 50.5},\n\t\trotation = {-90, 0, 0},\n\t\tfont_size = 200\n    })\n\t\n\tif self.getStateId() ~= StorageState then\n\t\tTimer.create({\n\t\t\tidentifier = (\"onAfterLoad\" .. self.guid),\n\t\t\tfunction_name = \"onAfterLoad\",\n\t\t\tdelay = 0.2\n\t\t})\n\tend\nend\n\nfunction onAfterLoad()\n\tlocal pos = self.getPosition()\n\tlocal bounds = self.getBoundsNormalized()\n\tlocal rot = self.getRotation()\n\tlocal direction = 1.0\n\t\n\tif rot.y == 0 then\n\t\tdirection = -1.0\n\tend\n\t\n\tBB.Min.x = BB.Min.x + pos.x\n\tBB.Min.y = BB.Min.y + pos.y - 1.5\n\tBB.Min.z = (BB.Min.z * direction) + pos.z\n\t\n\tBB.Max.x = \tBB.Max.x + pos.x\n\tBB.Max.y = \tBB.Max.y + pos.y + ConcealedStorageHeight + 0.5\n\tBB.Max.z = (BB.Max.z * direction) + pos.z\n\t\n\tHideObjectsAbove( false )\nend\n\nfunction onButtonClick()\n\tlocal currentState = self.getStateId()\n\tlocal nextState = 1 + (currentState % 2)\n\t\n\tif currentState ~= StorageState then\n\t\tHideObjectsAbove( true )\n\tend\n\t\n\tself.script_state = onSave()\n\tself.setState( nextState )\nend\n\nfunction HideObjectsAbove( toggle )\n    local objectsAbove = {}\n\tlocal BBMin = { x = BB.Min.x, y = BB.Min.y, z = BB.Min.z }\n\tlocal BBMax = { x = BB.Max.x, y = BB.Max.y, z = BB.Max.z }\n\t\n\tif not toggle then\n\t\tBBMin.y = BBMin.y - ConceiledStorageOffset\n\t\tBBMax.y = BBMax.y - ConceiledStorageOffset\n\tend\n    \n    for k,v in pairs( getAllObjects() ) do\n        if v != self then\n            if PointToAABBIntersect( BBMin, BBMax, v.getPosition() ) then\n                if toggle then\n                    Store( v )\n                else\n                    Dispense( v )\n                end\n            end\n        end\n    end\nend\n\n-- Assumes ||min|| < ||max||\nfunction PointToAABBIntersect( min, max, point )\n    if IsInRange( point.x, min.x, max.x ) and\n       IsInRange( point.y, min.y, max.y ) and\n       IsInRange( point.z, min.z, max.z ) then\n\t   return true\n    end\n    \n    return false\nend\n\nfunction IsInRange( value, a, b )\n\tlocal min = 0\n\tlocal max = 0\n\t\n\tif a > b then\n\t\tmax = a\n\t\tmin = b\n\telse\n\t\tmax = b\n\t\tmin = a\n\tend\n\t\n\tif value > min and value < max then\n\t\treturn true\n\tend\n\t\n\treturn false\nend\n\nfunction Store( obj )\n\tlocal pos = obj.getPosition()\n\tlocal isLocked = obj.getLock()\n\t\n\tObjectLockStates[obj.getGUID()] = isLocked;\n\t\n    obj.interactable = false\n    obj.setLock( true )\n    obj.setPosition({\n        x = pos.x,\n        y = pos.y - ConceiledStorageOffset,\n        z = pos.z\n    })\nend\n\nfunction Dispense( obj )\n\tlocal pos = obj.getPosition()\n\tlocal originalLockStatus = ObjectLockStates[obj.getGUID()] or false\n\t\n\tObjectLockStates[obj.getGUID()] = nil\n\t\n    obj.setPosition({\n        x = pos.x,\n        y = pos.y + ConceiledStorageOffset,\n        z = pos.z\n    })\n\t\n    obj.interactable = true\n\tobj.setLock( originalLockStatus or false )\nend",
+          "LuaScriptState": "[]",
+          "XmlUI": "",
+          "PhysicsMaterial": {
+            "StaticFriction": 0.6,
+            "DynamicFriction": 0.6,
+            "Bounciness": 0.0,
+            "FrictionCombine": 0,
+            "BounceCombine": 0
+          },
+          "Rigidbody": {
+            "Mass": 1.0,
+            "Drag": 0.1,
+            "AngularDrag": 0.1,
+            "UseGravity": false
+          }
+        }
+      }
+    },
+    {
+      "GUID": "7d257b",
+      "Name": "Custom_Assetbundle",
+      "Transform": {
+        "posX": 36.0,
+        "posY": -41.99,
+        "posZ": 0.0,
+        "rotX": 0.0,
+        "rotY": 0.0,
+        "rotZ": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "Board Cabinet",
+      "Description": "Click to open.",
+      "GMNotes": "",
+      "AltLookAngle": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "ColorDiffuse": {
+        "r": 0.249995053,
+        "g": 0.249995053,
+        "b": 0.249995053
+      },
+      "LayoutGroupSortIndex": 0,
+      "Value": 0,
+      "Locked": true,
+      "Grid": false,
+      "Snap": false,
+      "IgnoreFoW": false,
+      "MeasureMovement": false,
+      "DragSelectable": true,
+      "Autoraise": false,
+      "Sticky": true,
+      "Tooltip": false,
+      "GridProjection": false,
+      "HideWhenFaceDown": false,
+      "Hands": false,
+      "CustomAssetbundle": {
+        "AssetbundleURL": "http://cloud-3.steamusercontent.com/ugc/868496425808274507/801DDE162A6431250F18BADB2306A54FE4F9FAFF/",
+        "AssetbundleSecondaryURL": "",
+        "MaterialIndex": 1,
+        "TypeIndex": 4,
+        "LoopingEffectIndex": 0
+      },
+      "LuaScript": "function onLoad()\r\n    self.interactable = false;\r\n    self.createButton({\r\n    label = \"\",\r\n    click_function = \"onButtonClick\",\r\n    function_owner = self,\r\n    width = 1000,\r\n    height = 750,\r\n    color = {1, 0, 0, 0.0},\r\n    position = {0, 40.7, 32.8},\r\n    rotation = {-90, 0, 0},\r\n    font_size = 200\r\n    })\r\nend\r\n\r\nfunction onButtonClick()\r\n    self.setState( 1 + (self.getStateId() % 2) )\r\n\r\nend",
+      "LuaScriptState": "",
+      "XmlUI": "",
+      "PhysicsMaterial": {
+        "StaticFriction": 0.6,
+        "DynamicFriction": 0.6,
+        "Bounciness": 0.0,
+        "FrictionCombine": 0,
+        "BounceCombine": 0
+      },
+      "Rigidbody": {
+        "Mass": 1.0,
+        "Drag": 0.1,
+        "AngularDrag": 0.1,
+        "UseGravity": false
+      },
+      "States": {
+        "2": {
+          "GUID": "5dd89b",
+          "Name": "Custom_Assetbundle",
+          "Transform": {
+            "posX": 36.0,
+            "posY": -41.99,
+            "posZ": 0.0,
+            "rotX": 0.0,
+            "rotY": 0.0,
+            "rotZ": 0.0,
+            "scaleX": 1.0,
+            "scaleY": 1.0,
+            "scaleZ": 1.0
+          },
+          "Nickname": "Board Cabinet (Drawn)",
+          "Description": "Click on the handle to close.",
+          "GMNotes": "",
+          "AltLookAngle": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "ColorDiffuse": {
+            "r": 0.249998659,
+            "g": 0.249998659,
+            "b": 0.249998659
+          },
+          "LayoutGroupSortIndex": 0,
+          "Value": 0,
+          "Locked": true,
+          "Grid": false,
+          "Snap": false,
+          "IgnoreFoW": false,
+          "MeasureMovement": false,
+          "DragSelectable": true,
+          "Autoraise": false,
+          "Sticky": true,
+          "Tooltip": false,
+          "GridProjection": false,
+          "HideWhenFaceDown": false,
+          "Hands": false,
+          "CustomAssetbundle": {
+            "AssetbundleURL": "http://cloud-3.steamusercontent.com/ugc/868496425808279018/1BE1733E66A6D19385888B136F4E6DEDFC257969/",
+            "AssetbundleSecondaryURL": "",
+            "MaterialIndex": 1,
+            "TypeIndex": 4,
+            "LoopingEffectIndex": 0
+          },
+          "LuaScript": "local ConcealedStorageHeight = 3.0\nlocal ConceiledStorageOffset = 10000.0\nlocal StorageState = 1\nlocal ObjectLockStates = {}\n\nlocal BB = {\n\tMin = {\n\t\tx = -16.0,\n\t\ty = 41.99,\n\t\tz = -50.0\n\t},\n\tMax = {\n\t\tx = 16.0,\n\t\ty = 41.99,\n\t\tz = -32.0\n\t}\n}\n\nfunction onSave()\n    local saveObj = {};\n\t\n    for k,v in pairs( ObjectLockStates ) do\n        if v ~= nil then\n\t\t\tsaveObj[k] = v;\n        end\n    end\n\t\n    return JSON.encode( saveObj );\nend\n\nfunction onLoad( saveData )\n    self.interactable = false;\n\t\n\tif saveData ~= \"\" then\n\t\tObjectLockStates = JSON.decode( saveData ) or {};\n\tend\n\t\n    self.createButton({\n\t\tlabel = \"\",\n\t\tclick_function = \"onButtonClick\",\n\t\tfunction_owner = self,\n\t\twidth = 1000,\n\t\theight = 750,\n\t\tcolor = {1, 0, 0, 0.0},\n\t\tposition = {0, 40.7, 50.5},\n\t\trotation = {-90, 0, 0},\n\t\tfont_size = 200\n    })\n\t\n\tif self.getStateId() ~= StorageState then\n\t\tTimer.create({\n\t\t\tidentifier = (\"onAfterLoad\" .. self.guid),\n\t\t\tfunction_name = \"onAfterLoad\",\n\t\t\tdelay = 0.2\n\t\t})\n\tend\nend\n\nfunction onAfterLoad()\n\tlocal pos = self.getPosition()\n\tlocal bounds = self.getBoundsNormalized()\n\tlocal rot = self.getRotation()\n\tlocal direction = 1.0\n\t\n\tif rot.y == 0 then\n\t\tdirection = -1.0\n\tend\n\t\n\tBB.Min.x = BB.Min.x + pos.x\n\tBB.Min.y = BB.Min.y + pos.y - 1.5\n\tBB.Min.z = (BB.Min.z * direction) + pos.z\n\t\n\tBB.Max.x = \tBB.Max.x + pos.x\n\tBB.Max.y = \tBB.Max.y + pos.y + ConcealedStorageHeight + 0.5\n\tBB.Max.z = (BB.Max.z * direction) + pos.z\n\t\n\tHideObjectsAbove( false )\nend\n\nfunction onButtonClick()\n\tlocal currentState = self.getStateId()\n\tlocal nextState = 1 + (currentState % 2)\n\t\n\tif currentState ~= StorageState then\n\t\tHideObjectsAbove( true )\n\tend\n\t\n\tself.script_state = onSave()\n\tself.setState( nextState )\nend\n\nfunction HideObjectsAbove( toggle )\n    local objectsAbove = {}\n\tlocal BBMin = { x = BB.Min.x, y = BB.Min.y, z = BB.Min.z }\n\tlocal BBMax = { x = BB.Max.x, y = BB.Max.y, z = BB.Max.z }\n\t\n\tif not toggle then\n\t\tBBMin.y = BBMin.y - ConceiledStorageOffset\n\t\tBBMax.y = BBMax.y - ConceiledStorageOffset\n\tend\n    \n    for k,v in pairs( getAllObjects() ) do\n        if v != self then\n            if PointToAABBIntersect( BBMin, BBMax, v.getPosition() ) then\n                if toggle then\n                    Store( v )\n                else\n                    Dispense( v )\n                end\n            end\n        end\n    end\nend\n\n-- Assumes ||min|| < ||max||\nfunction PointToAABBIntersect( min, max, point )\n    if IsInRange( point.x, min.x, max.x ) and\n       IsInRange( point.y, min.y, max.y ) and\n       IsInRange( point.z, min.z, max.z ) then\n\t   return true\n    end\n    \n    return false\nend\n\nfunction IsInRange( value, a, b )\n\tlocal min = 0\n\tlocal max = 0\n\t\n\tif a > b then\n\t\tmax = a\n\t\tmin = b\n\telse\n\t\tmax = b\n\t\tmin = a\n\tend\n\t\n\tif value > min and value < max then\n\t\treturn true\n\tend\n\t\n\treturn false\nend\n\nfunction Store( obj )\n\tlocal pos = obj.getPosition()\n\tlocal isLocked = obj.getLock()\n\t\n\tObjectLockStates[obj.getGUID()] = isLocked;\n\t\n    obj.interactable = false\n    obj.setLock( true )\n    obj.setPosition({\n        x = pos.x,\n        y = pos.y - ConceiledStorageOffset,\n        z = pos.z\n    })\nend\n\nfunction Dispense( obj )\n\tlocal pos = obj.getPosition()\n\tlocal originalLockStatus = ObjectLockStates[obj.getGUID()] or false\n\t\n\tObjectLockStates[obj.getGUID()] = nil\n\t\n    obj.setPosition({\n        x = pos.x,\n        y = pos.y + ConceiledStorageOffset,\n        z = pos.z\n    })\n\t\n    obj.interactable = true\n\tobj.setLock( originalLockStatus or false )\nend",
+          "LuaScriptState": "[]",
+          "XmlUI": "",
+          "PhysicsMaterial": {
+            "StaticFriction": 0.6,
+            "DynamicFriction": 0.6,
+            "Bounciness": 0.0,
+            "FrictionCombine": 0,
+            "BounceCombine": 0
+          },
+          "Rigidbody": {
+            "Mass": 1.0,
+            "Drag": 0.1,
+            "AngularDrag": 0.1,
+            "UseGravity": false
+          }
+        }
+      }
+    },
+    {
+      "GUID": "6f636d",
+      "Name": "HandTrigger",
+      "Transform": {
+        "posX": 23.670002,
+        "posY": 3.34820342,
+        "posZ": 34.4527626,
+        "rotX": 0.0,
+        "rotY": 179.8,
+        "rotZ": 0.0,
+        "scaleX": 15.3268814,
+        "scaleY": 11.8970528,
+        "scaleZ": 6.35014772
+      },
+      "Nickname": "",
+      "Description": "",
+      "GMNotes": "",
+      "AltLookAngle": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "ColorDiffuse": {
+        "r": 0.117999978,
+        "g": 0.53,
+        "b": 1.0,
+        "a": 0.0
+      },
+      "LayoutGroupSortIndex": 0,
+      "Value": 0,
+      "Locked": true,
+      "Grid": false,
+      "Snap": true,
+      "IgnoreFoW": false,
+      "MeasureMovement": false,
+      "DragSelectable": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "GridProjection": false,
+      "HideWhenFaceDown": false,
+      "Hands": false,
+      "FogColor": "Blue",
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "XmlUI": ""
+    },
+    {
+      "GUID": "c71cc8",
+      "Name": "HandTrigger",
+      "Transform": {
+        "posX": 0.0,
+        "posY": 3.34820342,
+        "posZ": -34.42515,
+        "rotX": 0.0,
+        "rotY": 0.0,
+        "rotZ": 0.0,
+        "scaleX": 15.3268919,
+        "scaleY": 11.8970528,
+        "scaleZ": 6.35014534
+      },
+      "Nickname": "",
+      "Description": "",
+      "GMNotes": "",
+      "AltLookAngle": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "ColorDiffuse": {
+        "r": 0.442999959,
+        "g": 0.230999947,
+        "b": 0.0899999961,
+        "a": 0.0
+      },
+      "LayoutGroupSortIndex": 0,
+      "Value": 0,
+      "Locked": true,
+      "Grid": false,
+      "Snap": true,
+      "IgnoreFoW": false,
+      "MeasureMovement": false,
+      "DragSelectable": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "GridProjection": false,
+      "HideWhenFaceDown": false,
+      "Hands": false,
+      "FogColor": "Brown",
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "XmlUI": ""
+    },
+    {
+      "GUID": "286293",
+      "Name": "HandTrigger",
+      "Transform": {
+        "posX": -23.670002,
+        "posY": 3.34820342,
+        "posZ": 34.43159,
+        "rotX": 0.0,
+        "rotY": 180.0,
+        "rotZ": 0.0,
+        "scaleX": 15.3268747,
+        "scaleY": 11.8970528,
+        "scaleZ": 6.35014534
+      },
+      "Nickname": "",
+      "Description": "",
+      "GMNotes": "",
+      "AltLookAngle": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "ColorDiffuse": {
+        "r": 0.191999972,
+        "g": 0.701,
+        "b": 0.167999953,
+        "a": 0.0
+      },
+      "LayoutGroupSortIndex": 0,
+      "Value": 0,
+      "Locked": true,
+      "Grid": false,
+      "Snap": true,
+      "IgnoreFoW": false,
+      "MeasureMovement": false,
+      "DragSelectable": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "GridProjection": false,
+      "HideWhenFaceDown": false,
+      "Hands": false,
+      "FogColor": "Green",
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "XmlUI": ""
+    },
+    {
+      "GUID": "8e3f3c",
+      "Name": "HandTrigger",
+      "Transform": {
+        "posX": -51.6596222,
+        "posY": 3.34820342,
+        "posZ": -11.7324,
+        "rotX": 0.0,
+        "rotY": 90.0,
+        "rotZ": 0.0,
+        "scaleX": 15.1940193,
+        "scaleY": 11.8970528,
+        "scaleZ": 6.40568066
+      },
+      "Nickname": "",
+      "Description": "",
+      "GMNotes": "",
+      "AltLookAngle": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "ColorDiffuse": {
+        "r": 0.9559999,
+        "g": 0.39199996,
+        "b": 0.112999953,
+        "a": 0.0
+      },
+      "LayoutGroupSortIndex": 0,
+      "Value": 0,
+      "Locked": true,
+      "Grid": false,
+      "Snap": true,
+      "IgnoreFoW": false,
+      "MeasureMovement": false,
+      "DragSelectable": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "GridProjection": false,
+      "HideWhenFaceDown": false,
+      "Hands": false,
+      "FogColor": "Orange",
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "XmlUI": ""
+    },
+    {
+      "GUID": "156167",
+      "Name": "HandTrigger",
+      "Transform": {
+        "posX": 51.64263,
+        "posY": 3.34820342,
+        "posZ": -11.7324,
+        "rotX": 0.0,
+        "rotY": 270.0,
+        "rotZ": 0.0,
+        "scaleX": 15.1940022,
+        "scaleY": 11.8970528,
+        "scaleZ": 6.40568066
+      },
+      "Nickname": "",
+      "Description": "",
+      "GMNotes": "",
+      "AltLookAngle": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "ColorDiffuse": {
+        "r": 0.96,
+        "g": 0.438999981,
+        "b": 0.807,
+        "a": 0.0
+      },
+      "LayoutGroupSortIndex": 0,
+      "Value": 0,
+      "Locked": true,
+      "Grid": false,
+      "Snap": true,
+      "IgnoreFoW": false,
+      "MeasureMovement": false,
+      "DragSelectable": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "GridProjection": false,
+      "HideWhenFaceDown": false,
+      "Hands": false,
+      "FogColor": "Pink",
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "XmlUI": ""
+    },
+    {
+      "GUID": "a7b8ed",
+      "Name": "HandTrigger",
+      "Transform": {
+        "posX": 51.5785675,
+        "posY": 3.34820342,
+        "posZ": 11.7324,
+        "rotX": 0.0,
+        "rotY": 270.0,
+        "rotZ": 0.0,
+        "scaleX": 15.194006,
+        "scaleY": 11.8970528,
+        "scaleZ": 6.40568066
+      },
+      "Nickname": "",
+      "Description": "",
+      "GMNotes": "",
+      "AltLookAngle": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "ColorDiffuse": {
+        "r": 0.627,
+        "g": 0.124999978,
+        "b": 0.941,
+        "a": 0.0
+      },
+      "LayoutGroupSortIndex": 0,
+      "Value": 0,
+      "Locked": true,
+      "Grid": false,
+      "Snap": true,
+      "IgnoreFoW": false,
+      "MeasureMovement": false,
+      "DragSelectable": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "GridProjection": false,
+      "HideWhenFaceDown": false,
+      "Hands": false,
+      "FogColor": "Purple",
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "XmlUI": ""
+    },
+    {
+      "GUID": "2c663f",
+      "Name": "HandTrigger",
+      "Transform": {
+        "posX": -23.670002,
+        "posY": 3.34820342,
+        "posZ": -34.42515,
+        "rotX": 0.0,
+        "rotY": 0.0,
+        "rotZ": 0.0,
+        "scaleX": 15.3268938,
+        "scaleY": 11.8970528,
+        "scaleZ": 6.35014534
+      },
+      "Nickname": "",
+      "Description": "",
+      "GMNotes": "",
+      "AltLookAngle": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "ColorDiffuse": {
+        "r": 0.856,
+        "g": 0.09999997,
+        "b": 0.09399996,
+        "a": 0.0
+      },
+      "LayoutGroupSortIndex": 0,
+      "Value": 0,
+      "Locked": true,
+      "Grid": false,
+      "Snap": true,
+      "IgnoreFoW": false,
+      "MeasureMovement": false,
+      "DragSelectable": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "GridProjection": false,
+      "HideWhenFaceDown": false,
+      "Hands": false,
+      "FogColor": "Red",
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "XmlUI": ""
+    },
+    {
+      "GUID": "230a98",
+      "Name": "HandTrigger",
+      "Transform": {
+        "posX": 0.0,
+        "posY": 3.34820342,
+        "posZ": 34.4527626,
+        "rotX": 0.0,
+        "rotY": 179.800049,
+        "rotZ": 0.0,
+        "scaleX": 15.3268843,
+        "scaleY": 11.8970528,
+        "scaleZ": 6.35014772
+      },
+      "Nickname": "",
+      "Description": "",
+      "GMNotes": "",
+      "AltLookAngle": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "ColorDiffuse": {
+        "r": 0.128999949,
+        "g": 0.694,
+        "b": 0.606999934,
+        "a": 0.0
+      },
+      "LayoutGroupSortIndex": 0,
+      "Value": 0,
+      "Locked": true,
+      "Grid": false,
+      "Snap": true,
+      "IgnoreFoW": false,
+      "MeasureMovement": false,
+      "DragSelectable": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "GridProjection": false,
+      "HideWhenFaceDown": false,
+      "Hands": false,
+      "FogColor": "Teal",
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "XmlUI": ""
+    },
+    {
+      "GUID": "71ca9a",
+      "Name": "HandTrigger",
+      "Transform": {
+        "posX": 23.670002,
+        "posY": 3.34820342,
+        "posZ": -34.2558136,
+        "rotX": 0.0,
+        "rotY": 0.0,
+        "rotZ": 0.0,
+        "scaleX": 15.3268747,
+        "scaleY": 11.8970547,
+        "scaleZ": 6.705048
+      },
+      "Nickname": "",
+      "Description": "",
+      "GMNotes": "",
+      "AltLookAngle": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "ColorDiffuse": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0,
+        "a": 0.0
+      },
+      "LayoutGroupSortIndex": 0,
+      "Value": 0,
+      "Locked": true,
+      "Grid": false,
+      "Snap": true,
+      "IgnoreFoW": false,
+      "MeasureMovement": false,
+      "DragSelectable": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "GridProjection": false,
+      "HideWhenFaceDown": false,
+      "Hands": false,
+      "FogColor": "White",
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "XmlUI": ""
+    },
+    {
+      "GUID": "6a2149",
+      "Name": "HandTrigger",
+      "Transform": {
+        "posX": -51.6596222,
+        "posY": 3.34820342,
+        "posZ": 11.7324,
+        "rotX": 0.0,
+        "rotY": 90.0,
+        "rotZ": 0.0,
+        "scaleX": 15.1940155,
+        "scaleY": 11.8970528,
+        "scaleZ": 6.40568066
+      },
+      "Nickname": "",
+      "Description": "",
+      "GMNotes": "",
+      "AltLookAngle": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "ColorDiffuse": {
+        "r": 0.905,
+        "g": 0.898,
+        "b": 0.171999961,
+        "a": 0.0
+      },
+      "LayoutGroupSortIndex": 0,
+      "Value": 0,
+      "Locked": true,
+      "Grid": false,
+      "Snap": true,
+      "IgnoreFoW": false,
+      "MeasureMovement": false,
+      "DragSelectable": true,
+      "Autoraise": true,
+      "Sticky": true,
+      "Tooltip": true,
+      "GridProjection": false,
+      "HideWhenFaceDown": false,
+      "Hands": false,
+      "FogColor": "Yellow",
+      "LuaScript": "",
+      "LuaScriptState": "",
+      "XmlUI": ""
+    },
+    {
+      "GUID": "dcbdb2",
+      "Name": "Custom_Assetbundle",
+      "Transform": {
+        "posX": 0.00236129761,
+        "posY": -41.99,
+        "posZ": 0.001013766,
+        "rotX": 4.589737E-07,
+        "rotY": -0.000937106553,
+        "rotZ": 0.00338295964,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "Extend",
+      "Description": "Click to add an extension to the table.",
+      "GMNotes": "",
+      "AltLookAngle": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "ColorDiffuse": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0
+      },
+      "LayoutGroupSortIndex": 0,
+      "Value": 0,
+      "Locked": true,
+      "Grid": false,
+      "Snap": false,
+      "IgnoreFoW": false,
+      "MeasureMovement": false,
+      "DragSelectable": true,
+      "Autoraise": false,
+      "Sticky": false,
+      "Tooltip": false,
+      "GridProjection": false,
+      "HideWhenFaceDown": false,
+      "Hands": false,
+      "CustomAssetbundle": {
+        "AssetbundleURL": "http://cloud-3.steamusercontent.com/ugc/868496425808427672/964B4FF361543B63A775D036814154F980F134AF/",
+        "AssetbundleSecondaryURL": "",
+        "MaterialIndex": 2,
+        "TypeIndex": 4,
+        "LoopingEffectIndex": 0
+      },
+      "LuaScript": "function onLoad()\r\n    self.interactable = false;\r\n    self.createButton({\r\n    label = \"\",\r\n    click_function = \"onButtonClick\",\r\n    function_owner = self,\r\n    width = 5000,\r\n    height = 1000,\r\n    color = {0, 0, 0, 0.0},\r\n    position = {62.4, 40.75, 0},\r\n    rotation = {0, 90, 90},\r\n    font_size = 200\r\n    })\r\nend\r\n\r\nfunction onButtonClick()\r\n    self.setState( 1 + (self.getStateId() % 2) )\r\n\r\nend",
+      "LuaScriptState": "",
+      "XmlUI": "",
+      "PhysicsMaterial": {
+        "StaticFriction": 0.6,
+        "DynamicFriction": 0.6,
+        "Bounciness": 0.0,
+        "FrictionCombine": 0,
+        "BounceCombine": 0
+      },
+      "Rigidbody": {
+        "Mass": 1E+14,
+        "Drag": 1E+17,
+        "AngularDrag": 1E+14,
+        "UseGravity": false
+      },
+      "States": {
+        "2": {
+          "GUID": "04c44a",
+          "Name": "Custom_Assetbundle",
+          "Transform": {
+            "posX": 0.00236129761,
+            "posY": -41.99,
+            "posZ": 0.001013766,
+            "rotX": 4.589737E-07,
+            "rotY": -0.000937106553,
+            "rotZ": 0.00338295964,
+            "scaleX": 1.0,
+            "scaleY": 1.0,
+            "scaleZ": 1.0
+          },
+          "Nickname": "Table Extension",
+          "Description": "",
+          "GMNotes": "",
+          "AltLookAngle": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "ColorDiffuse": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0
+          },
+          "LayoutGroupSortIndex": 0,
+          "Value": 0,
+          "Locked": true,
+          "Grid": false,
+          "Snap": false,
+          "IgnoreFoW": false,
+          "MeasureMovement": false,
+          "DragSelectable": true,
+          "Autoraise": false,
+          "Sticky": true,
+          "Tooltip": false,
+          "GridProjection": false,
+          "HideWhenFaceDown": false,
+          "Hands": false,
+          "CustomAssetbundle": {
+            "AssetbundleURL": "http://cloud-3.steamusercontent.com/ugc/868496546869694123/1567EBEAA6AA35068A6FFD335F3A773EDD17B48D/",
+            "AssetbundleSecondaryURL": "",
+            "MaterialIndex": 1,
+            "TypeIndex": 4,
+            "LoopingEffectIndex": 0
+          },
+          "LuaScript": "function onLoad()\r\n    self.interactable = false;\r\n    self.createButton({\r\n    label = \"\",\r\n    click_function = \"onButtonClick\",\r\n    function_owner = self,\r\n    width = 5000,\r\n    height = 1000,\r\n    color = {0, 0, 0, 0.0},\r\n    position = {62.4, 40.75, 0},\r\n    rotation = {0, 90, 90},\r\n    font_size = 200\r\n    })\r\nend\r\n\r\nfunction onButtonClick()\r\n    self.setState( 1 + (self.getStateId() % 2) )\r\n\r\nend",
+          "LuaScriptState": "",
+          "XmlUI": "",
+          "PhysicsMaterial": {
+            "StaticFriction": 0.6,
+            "DynamicFriction": 0.6,
+            "Bounciness": 0.0,
+            "FrictionCombine": 0,
+            "BounceCombine": 0
+          },
+          "Rigidbody": {
+            "Mass": 1E+09,
+            "Drag": 1E+15,
+            "AngularDrag": 1E+13,
+            "UseGravity": false
+          }
+        }
+      }
+    },
+    {
+      "GUID": "437cd7",
+      "Name": "Custom_Model",
+      "Transform": {
+        "posX": -0.000187599682,
+        "posY": -42.2,
+        "posZ": 0.00018766518,
+        "rotX": -0.00024980685,
+        "rotY": 180.0,
+        "rotZ": -0.0007672871,
+        "scaleX": 4.0,
+        "scaleY": 4.0,
+        "scaleZ": 4.0
+      },
+      "Nickname": "Board",
+      "Description": "",
+      "GMNotes": "",
+      "AltLookAngle": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "ColorDiffuse": {
+        "r": 1.0,
+        "g": 1.0,
+        "b": 1.0
+      },
+      "LayoutGroupSortIndex": 0,
+      "Value": 0,
+      "Locked": true,
+      "Grid": false,
+      "Snap": false,
+      "IgnoreFoW": false,
+      "MeasureMovement": false,
+      "DragSelectable": true,
+      "Autoraise": false,
+      "Sticky": true,
+      "Tooltip": false,
+      "GridProjection": true,
+      "HideWhenFaceDown": false,
+      "Hands": false,
+      "CustomMesh": {
+        "MeshURL": "http://cloud-3.steamusercontent.com/ugc/868496425808310268/383523E82AF9E082DDB776F54C025C71A30E098F/",
+        "DiffuseURL": "http://cloud-3.steamusercontent.com/ugc/1811034537804729814/3C2DF2C5A82B4850A519B5CC9C46ADA784E839BE/",
+        "NormalURL": "",
+        "ColliderURL": "",
+        "Convex": true,
+        "MaterialIndex": 3,
+        "TypeIndex": 4,
+        "CustomShader": {
+          "SpecularColor": {
+            "r": 1.0,
+            "g": 1.0,
+            "b": 1.0
+          },
+          "SpecularIntensity": 0.0,
+          "SpecularSharpness": 2.0,
+          "FresnelStrength": 0.0
+        },
+        "CastShadows": true
+      },
+      "LuaScript": "function onLoad()\r\n    self.interactable = false;\r\n    self.createButton({\r\n    label = \"CUSTOMIZE BOARD\",\r\n    click_function = \"onButtonClick\",\r\n    function_owner = self,\r\n    width = 750,\r\n    height = 75,\r\n    color = {1, 1, 1, 1.0},\r\n    position = {-15.5, 10, -5},\r\n    rotation = {180, 270, 80},\r\n    font_size = 75\r\n})\r\nend\r\n\r\nfunction onButtonClick()\r\n    if self.interactable == false then\r\n        self.interactable = true;\r\n        self.setColorTint({1, 1, 1})\r\n        self.editButton({ label = \"LOCK BOARD\" })\r\n\r\n    else\r\n        self.interactable = false;\r\n        self.editButton({ label = \"CUSTOMIZE BOARD\"})\r\n\r\n    end\r\nend",
+      "LuaScriptState": "",
+      "XmlUI": "",
+      "PhysicsMaterial": {
+        "StaticFriction": 0.6,
+        "DynamicFriction": 0.6,
+        "Bounciness": 0.0,
+        "FrictionCombine": 0,
+        "BounceCombine": 0
+      },
+      "Rigidbody": {
+        "Mass": 1.75,
+        "Drag": 1E+12,
+        "AngularDrag": 1E+13,
+        "UseGravity": false
+      }
+    },
+    {
+      "GUID": "3dcbdd",
+      "Name": "Custom_Assetbundle",
+      "Transform": {
+        "posX": 0.0,
+        "posY": -41.99,
+        "posZ": 0.0,
+        "rotX": 0.0,
+        "rotY": 0.0,
+        "rotZ": 0.0,
+        "scaleX": 1.0,
+        "scaleY": 1.0,
+        "scaleZ": 1.0
+      },
+      "Nickname": "Board Cabinet",
+      "Description": "Click to open.",
+      "GMNotes": "",
+      "AltLookAngle": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+      },
+      "ColorDiffuse": {
+        "r": 0.249995381,
+        "g": 0.249995381,
+        "b": 0.249995381
+      },
+      "LayoutGroupSortIndex": 0,
+      "Value": 0,
+      "Locked": true,
+      "Grid": false,
+      "Snap": false,
+      "IgnoreFoW": false,
+      "MeasureMovement": false,
+      "DragSelectable": true,
+      "Autoraise": false,
+      "Sticky": true,
+      "Tooltip": false,
+      "GridProjection": false,
+      "HideWhenFaceDown": false,
+      "Hands": false,
+      "CustomAssetbundle": {
+        "AssetbundleURL": "http://cloud-3.steamusercontent.com/ugc/868496425808274507/801DDE162A6431250F18BADB2306A54FE4F9FAFF/",
+        "AssetbundleSecondaryURL": "",
+        "MaterialIndex": 1,
+        "TypeIndex": 4,
+        "LoopingEffectIndex": 0
+      },
+      "LuaScript": "function onLoad()\r\n    self.interactable = false;\r\n    self.createButton({\r\n    label = \"\",\r\n    click_function = \"onButtonClick\",\r\n    function_owner = self,\r\n    width = 1000,\r\n    height = 750,\r\n    color = {1, 0, 0, 0.0},\r\n    position = {0, 40.7, 32.8},\r\n    rotation = {-90, 0, 0},\r\n    font_size = 200\r\n    })\r\nend\r\n\r\nfunction onButtonClick()\r\n    self.setState( 1 + (self.getStateId() % 2) )\r\n\r\nend",
+      "LuaScriptState": "",
+      "XmlUI": "",
+      "PhysicsMaterial": {
+        "StaticFriction": 0.6,
+        "DynamicFriction": 0.6,
+        "Bounciness": 0.0,
+        "FrictionCombine": 0,
+        "BounceCombine": 0
+      },
+      "Rigidbody": {
+        "Mass": 1.0,
+        "Drag": 0.1,
+        "AngularDrag": 0.1,
+        "UseGravity": false
+      },
+      "States": {
+        "2": {
+          "GUID": "661907",
+          "Name": "Custom_Assetbundle",
+          "Transform": {
+            "posX": 0.0,
+            "posY": -41.99,
+            "posZ": 0.0,
+            "rotX": 0.0,
+            "rotY": 0.0,
+            "rotZ": 0.0,
+            "scaleX": 1.0,
+            "scaleY": 1.0,
+            "scaleZ": 1.0
+          },
+          "Nickname": "Board Cabinet (Drawn)",
+          "Description": "Click on the handle to close.",
+          "GMNotes": "",
+          "AltLookAngle": {
+            "x": 0.0,
+            "y": 0.0,
+            "z": 0.0
+          },
+          "ColorDiffuse": {
+            "r": 0.249998659,
+            "g": 0.249998659,
+            "b": 0.249998659
+          },
+          "LayoutGroupSortIndex": 0,
+          "Value": 0,
+          "Locked": true,
+          "Grid": false,
+          "Snap": false,
+          "IgnoreFoW": false,
+          "MeasureMovement": false,
+          "DragSelectable": true,
+          "Autoraise": false,
+          "Sticky": true,
+          "Tooltip": false,
+          "GridProjection": false,
+          "HideWhenFaceDown": false,
+          "Hands": false,
+          "CustomAssetbundle": {
+            "AssetbundleURL": "http://cloud-3.steamusercontent.com/ugc/868496425808279018/1BE1733E66A6D19385888B136F4E6DEDFC257969/",
+            "AssetbundleSecondaryURL": "",
+            "MaterialIndex": 1,
+            "TypeIndex": 4,
+            "LoopingEffectIndex": 0
+          },
+          "LuaScript": "local ConcealedStorageHeight = 3.0\nlocal ConceiledStorageOffset = 10000.0\nlocal StorageState = 1\nlocal ObjectLockStates = {}\n\nlocal BB = {\n\tMin = {\n\t\tx = -16.0,\n\t\ty = 41.99,\n\t\tz = -50.0\n\t},\n\tMax = {\n\t\tx = 16.0,\n\t\ty = 41.99,\n\t\tz = -32.0\n\t}\n}\n\nfunction onSave()\n    local saveObj = {};\n\t\n    for k,v in pairs( ObjectLockStates ) do\n        if v ~= nil then\n\t\t\tsaveObj[k] = v;\n        end\n    end\n\t\n    return JSON.encode( saveObj );\nend\n\nfunction onLoad( saveData )\n    self.interactable = false;\n\t\n\tif saveData ~= \"\" then\n\t\tObjectLockStates = JSON.decode( saveData ) or {};\n\tend\n\t\n    self.createButton({\n\t\tlabel = \"\",\n\t\tclick_function = \"onButtonClick\",\n\t\tfunction_owner = self,\n\t\twidth = 1000,\n\t\theight = 750,\n\t\tcolor = {1, 0, 0, 0.0},\n\t\tposition = {0, 40.7, 50.5},\n\t\trotation = {-90, 0, 0},\n\t\tfont_size = 200\n    })\n\t\n\tif self.getStateId() ~= StorageState then\n\t\tTimer.create({\n\t\t\tidentifier = (\"onAfterLoad\" .. self.guid),\n\t\t\tfunction_name = \"onAfterLoad\",\n\t\t\tdelay = 0.2\n\t\t})\n\tend\nend\n\nfunction onAfterLoad()\n\tlocal pos = self.getPosition()\n\tlocal bounds = self.getBoundsNormalized()\n\tlocal rot = self.getRotation()\n\tlocal direction = 1.0\n\t\n\tif rot.y == 0 then\n\t\tdirection = -1.0\n\tend\n\t\n\tBB.Min.x = BB.Min.x + pos.x\n\tBB.Min.y = BB.Min.y + pos.y - 1.5\n\tBB.Min.z = (BB.Min.z * direction) + pos.z\n\t\n\tBB.Max.x = \tBB.Max.x + pos.x\n\tBB.Max.y = \tBB.Max.y + pos.y + ConcealedStorageHeight + 0.5\n\tBB.Max.z = (BB.Max.z * direction) + pos.z\n\t\n\tHideObjectsAbove( false )\nend\n\nfunction onButtonClick()\n\tlocal currentState = self.getStateId()\n\tlocal nextState = 1 + (currentState % 2)\n\t\n\tif currentState ~= StorageState then\n\t\tHideObjectsAbove( true )\n\tend\n\t\n\tself.script_state = onSave()\n\tself.setState( nextState )\nend\n\nfunction HideObjectsAbove( toggle )\n    local objectsAbove = {}\n\tlocal BBMin = { x = BB.Min.x, y = BB.Min.y, z = BB.Min.z }\n\tlocal BBMax = { x = BB.Max.x, y = BB.Max.y, z = BB.Max.z }\n\t\n\tif not toggle then\n\t\tBBMin.y = BBMin.y - ConceiledStorageOffset\n\t\tBBMax.y = BBMax.y - ConceiledStorageOffset\n\tend\n    \n    for k,v in pairs( getAllObjects() ) do\n        if v != self then\n            if PointToAABBIntersect( BBMin, BBMax, v.getPosition() ) then\n                if toggle then\n                    Store( v )\n                else\n                    Dispense( v )\n                end\n            end\n        end\n    end\nend\n\n-- Assumes ||min|| < ||max||\nfunction PointToAABBIntersect( min, max, point )\n    if IsInRange( point.x, min.x, max.x ) and\n       IsInRange( point.y, min.y, max.y ) and\n       IsInRange( point.z, min.z, max.z ) then\n\t   return true\n    end\n    \n    return false\nend\n\nfunction IsInRange( value, a, b )\n\tlocal min = 0\n\tlocal max = 0\n\t\n\tif a > b then\n\t\tmax = a\n\t\tmin = b\n\telse\n\t\tmax = b\n\t\tmin = a\n\tend\n\t\n\tif value > min and value < max then\n\t\treturn true\n\tend\n\t\n\treturn false\nend\n\nfunction Store( obj )\n\tlocal pos = obj.getPosition()\n\tlocal isLocked = obj.getLock()\n\t\n\tObjectLockStates[obj.getGUID()] = isLocked;\n\t\n    obj.interactable = false\n    obj.setLock( true )\n    obj.setPosition({\n        x = pos.x,\n        y = pos.y - ConceiledStorageOffset,\n        z = pos.z\n    })\nend\n\nfunction Dispense( obj )\n\tlocal pos = obj.getPosition()\n\tlocal originalLockStatus = ObjectLockStates[obj.getGUID()] or false\n\t\n\tObjectLockStates[obj.getGUID()] = nil\n\t\n    obj.setPosition({\n        x = pos.x,\n        y = pos.y + ConceiledStorageOffset,\n        z = pos.z\n    })\n\t\n    obj.interactable = true\n\tobj.setLock( originalLockStatus or false )\nend",
+          "LuaScriptState": "{\"ff8268\":true}",
+          "XmlUI": "",
+          "PhysicsMaterial": {
+            "StaticFriction": 0.6,
+            "DynamicFriction": 0.6,
+            "Bounciness": 0.0,
+            "FrictionCombine": 0,
+            "BounceCombine": 0
+          },
+          "Rigidbody": {
+            "Mass": 1.0,
+            "Drag": 0.1,
+            "AngularDrag": 0.1,
+            "UseGravity": false
+          }
+        }
+      }
     }
   ]
 }

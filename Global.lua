@@ -50,67 +50,81 @@ function setup()
     end
 
     -- Deal Game sheets
-    local gameSheetsBag = getObjectFromGUID('ff8268')
-    for _, playerColorName in pairs(getSeatedPlayers()) do
-        for _, hand in ipairs(Hands.getHands()) do
-            local data = hand.getData()
-            for k, v in pairs(data) do
-                if k == "ColorDiffuse" then
-                    local handZoneColor = cloneWithAlpha1(v)
-                    local playerColor = Color.fromString(playerColorName)
-                    if handZoneColor == playerColor then
-                        local newPosition = nil
-                        if hand.getRotation().y == 0 then
-                            newPosition = {
-                                hand.getPosition().x,
-                                hand.getPosition().y,
-                                hand.getPosition().z + 8.36
-                            }
-                        end
-                        if hand.getRotation().y == 90 then
-                            newPosition = {
-                                hand.getPosition().x + 8.36,
-                                hand.getPosition().y,
-                                hand.getPosition().z
-                            }
-                        end
-                        if hand.getRotation().y == 180 then
-                            newPosition = {
-                                hand.getPosition().x,
-                                hand.getPosition().y,
-                                hand.getPosition().z - 8.36
-                            }
-                        end
-                        if hand.getRotation().y == 270 then
-                            newPosition = {
-                                hand.getPosition().x - 8.36,
-                                hand.getPosition().y,
-                                hand.getPosition().z
-                            }
-                        end
-                        gameSheetsBag.takeObject(
-                            {
-                                position = newPosition,
-                                rotation = {
-                                    0, 180, 0
-                                },
-                                smooth = true,
-                                callback_function = function(takenObject)
-                                    Wait.time(
-                                        function()
-                                            takenObject.setLock(true)
-                                        end,
-                                        3
-                                    )
+    local drawer = getObjectFromGUID('3dcbdd')
+    drawer.call('onButtonClick')
+    Wait.time(
+        function()
+            local gameSheetsBag = getObjectFromGUID('ff8268')
+            for _, playerColorName in pairs(getSeatedPlayers()) do
+                for _, hand in ipairs(Hands.getHands()) do
+                    local data = hand.getData()
+                    for k, v in pairs(data) do
+                        if k == "ColorDiffuse" then
+                            local handZoneColor = cloneWithAlpha1(v)
+                            local playerColor = Color.fromString(playerColorName)
+                            if handZoneColor == playerColor then
+                                local newPosition = nil
+                                local newRotation = nil
+                                if hand.getRotation().y == 0 then
+                                    newPosition = {
+                                        hand.getPosition().x,
+                                        hand.getPosition().y,
+                                        hand.getPosition().z + 18
+                                    }
                                 end
-                            }
-                        )
-                        break
+                                if hand.getRotation().y == 90 then
+                                    newPosition = {
+                                        hand.getPosition().x + 11,
+                                        hand.getPosition().y,
+                                        hand.getPosition().z
+                                    }
+                                end
+                                if hand.getRotation().y == 180 then
+                                    newPosition = {
+                                        hand.getPosition().x,
+                                        hand.getPosition().y,
+                                        hand.getPosition().z - 18
+                                    }
+                                end
+                                if hand.getRotation().y == 270 then
+                                    newPosition = {
+                                        hand.getPosition().x - 11,
+                                        hand.getPosition().y,
+                                        hand.getPosition().z
+                                    }
+                                end
+                                local newRotation = {hand.getRotation().x, hand.getRotation().y - 180, hand.getRotation().z}
+                                gameSheetsBag.takeObject(
+                                    {
+                                        position = newPosition,
+                                        rotation = newRotation,
+                                        smooth = true,
+                                        callback_function = function(takenObject)
+                                            Wait.time(
+                                                function()
+                                                    takenObject.setLock(true)
+                                                end,
+                                                3
+                                            )
+                                        end
+                                    }
+                                )
+                                break
+                            end
+                        end
                     end
                 end
+                Wait.time(
+                    function()
+                        drawer = getObjectFromGUID('661907')
+                        drawer.call('onButtonClick')
+                    end,
+                    1
+                )
             end
-        end
-    end
+        end,
+        2
+    )
 end
 
  -- alpha 1 is needed since equals() contemplated it
