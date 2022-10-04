@@ -5,8 +5,14 @@ function onLoad()
             click_function = 'setup',
             function_owner = Global,
             label          = 'Setup',
-            position       = {0, 0.01, 1.5},
-            scale          = {2, 2, 2},
+            position       = {
+                0, 0.01, 1.5
+            },
+            scale = {
+                2,
+                2,
+                2
+            },
             width          = 400,
             height         = 120
         }
@@ -16,36 +22,42 @@ end
 function setup()
     -- Place Discovery cards
     buttonContainer.removeButton(#buttonContainer.getButtons() - 3)
-    for _, obj in pairs(getObjects()) do
-        if obj.type == 'Deck' then
-            obj.shuffle()
+    local singleCardsGUIDs = {}
+    for _, aCard in ipairs(getObjects()) do
+        if aCard.type == 'Card' then
+            table.insert(singleCardsGUIDs, aCard.getGUID())
+        end
+    end
+    for _, aDeck in ipairs(getObjects()) do
+        if aDeck.type == 'Deck' then
+            aDeck.shuffle()
             Wait.time(
                 function()
-                    obj.takeObject(
+                    local deckGUID = aDeck.getGUID()
+                    aDeck.takeObject(
                         {
                             position = {
-                                obj.getPosition().x,
-                                obj.getPosition().y + 3,
-                                obj.getPosition().z
+                                aDeck.getPosition().x,
+                                aDeck.getPosition().y + 3,
+                                aDeck.getPosition().z
                             },
                             smooth = true,
-                            callback_function = function(takenObject)
-                                if takenObject.type == 'Card' and takenObject.is_face_down then
-                                    Wait.time(
-                                        function()
-                                            takenObject.flip()
-                                        end,
-                                        0.8
-                                    )
-                                end
-                                obj.destruct()
-                            end
+                            flip = true
                         }
+                    )
+                    Wait.time(
+                        function()
+                            for _, remainingCards in ipairs(getObjects()) do
+                                if remainingCards.type == 'Deck' or (remainingCards.type == 'Card' and remainingCards.is_face_down) then
+                                    remainingCards.destruct()
+                                end
+                            end
+                        end,
+                        0.6
                     )
                 end,
                 0.6
             )
-            -- obj.destruct()
         end
     end
 
@@ -55,7 +67,7 @@ function setup()
     Wait.time(
         function()
             local gameSheetsBag = getObjectFromGUID('ff8268')
-            for _, playerColorName in pairs(getSeatedPlayers()) do
+            for _, playerColorName in ipairs(getSeatedPlayers()) do
                 for _, hand in ipairs(Hands.getHands()) do
                     local data = hand.getData()
                     for k, v in pairs(data) do
@@ -99,10 +111,10 @@ function setup()
                                         position = newPosition,
                                         rotation = newRotation,
                                         smooth = true,
-                                        callback_function = function(takenObject)
+                                        callback_function = function(takenSheet)
                                             Wait.time(
                                                 function()
-                                                    takenObject.setLock(true)
+                                                    takenSheet.setLock(true)
                                                 end,
                                                 3
                                             )
